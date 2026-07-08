@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prompt-debugger.dev/schemas/knowledge-patterns-index/v1",
+  "title": "Pattern Library index v1",
+  "description": "Index of before/after prompt patterns. Pattern bodies are markdown files next to the index.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["file_version", "patterns"],
+  "properties": {
+    "file_version": { "const": 1 },
+    "patterns": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "title", "file", "techniques", "dimensions", "status"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^pat-[a-z0-9-]+$" },
+          "title": { "type": "string", "minLength": 1 },
+          "file": { "type": "string", "pattern": "^[a-z0-9-]+\\.md$" },
+          "techniques": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^T[0-9]+$" }
+          },
+          "dimensions": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^R[0-9]+$" }
+          },
+          "status": { "type": "string", "enum": ["draft", "active", "deprecated"] }
+        }
+      }
+    }
+  }
+}

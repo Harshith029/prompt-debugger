@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prompt-debugger.dev/schemas/config/v1",
+  "title": "Storage Config v1",
+  "description": "User configuration for the storage layer. Lives at ~/.prompt-debugger/config.json with optional per-project override.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["config_version"],
+  "properties": {
+    "config_version": { "const": 1 },
+    "storage_scope": {
+      "type": "string",
+      "enum": ["user", "project"],
+      "default": "user",
+      "description": "'user' (default): ~/.prompt-debugger/stores/<project-key>/. 'project': <project>/.prompt-debugger/ — explicit opt-in; the store is created self-ignoring."
+    },
+    "project_local_acknowledged": {
+      "type": "boolean",
+      "default": false,
+      "description": "Must be true for storage_scope=project to take effect; set by the interactive opt-in flow."
+    },
+    "allow_raw_saves": {
+      "type": "boolean",
+      "default": true,
+      "description": "When false, raw saves are refused outright; when true, each raw save still requires per-save confirmation."
+    },
+    "redaction_enabled": {
+      "type": "boolean",
+      "default": true,
+      "description": "Safety valve for debugging redaction itself; disabling still never bypasses the per-save raw confirmation."
+    },
+    "size_warn_records": {
+      "type": "integer",
+      "minimum": 1000,
+      "default": 50000,
+      "description": "Record count at which the CLI suggests 'archive'. Default is provisional until M2 benchmarks set a measured value."
+    }
+  }
+}

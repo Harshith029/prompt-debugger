@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prompt-debugger.dev/schemas/benchmark-case/v1",
+  "title": "Benchmark Case v1",
+  "description": "One benchmark prompt with reviewable expectations. Expectations guide human review and regression tracking; they are not machine assertions at M0.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["case_version", "id", "category", "prompt", "expectations", "notes"],
+  "properties": {
+    "case_version": { "const": 1 },
+    "id": { "type": "string", "pattern": "^bm-[a-z0-9-]+$" },
+    "category": {
+      "type": "string",
+      "enum": [
+        "good",
+        "poor",
+        "ambiguous",
+        "coding",
+        "research",
+        "creative",
+        "educational",
+        "long-context",
+        "multi-step"
+      ]
+    },
+    "prompt": { "type": "string", "minLength": 1 },
+    "event": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "default": null,
+      "required": ["kind", "verbatim"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "refusal_message",
+            "model_switch",
+            "api_refusal_stop_reason",
+            "api_fallback_block",
+            "error",
+            "unknown",
+            "none"
+          ]
+        },
+        "verbatim": { "type": "string", "minLength": 1 }
+      }
+    },
+    "expectations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["likely_dimensions", "rewrite_expected", "gate_expected"],
+      "properties": {
+        "likely_dimensions": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^R[0-9]+$" },
+          "description": "Rubric dimensions a reviewer expects to see. May be empty for good prompts."
+        },
+        "rewrite_expected": { "type": "boolean" },
+        "gate_expected": {
+          "type": "string",
+          "enum": ["passed", "conditional", "declined", "not_applicable"]
+        }
+      }
+    },
+    "notes": { "type": "string", "minLength": 1 }
+  }
+}

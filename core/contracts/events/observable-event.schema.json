@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prompt-debugger.dev/schemas/observable-event/v1",
+  "title": "Observable Event v1",
+  "description": "A user-observable event: what appeared on the user's screen or in an API response, classified against the Knowledge Engine event taxonomy. Facts only; estimates live in report.estimates.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["event_version", "kind", "surface", "verbatim", "documented_match"],
+  "properties": {
+    "event_version": { "const": 1 },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "refusal_message",
+        "model_switch",
+        "api_refusal_stop_reason",
+        "api_fallback_block",
+        "error",
+        "unknown",
+        "none"
+      ],
+      "description": "Extensible-by-policy enum: 'unknown' is the mandated graceful-degradation member for anything undocumented."
+    },
+    "surface": {
+      "type": "string",
+      "enum": ["claude_ai", "claude_code", "api", "other", "unspecified"],
+      "description": "Where the user observed it. 'other' covers additional hosts; 'unspecified' when the user did not say."
+    },
+    "verbatim": {
+      "type": ["string", "null"],
+      "description": "Exactly what the user saw, quoted. null when the user could not provide it."
+    },
+    "documented_match": {
+      "type": ["string", "null"],
+      "pattern": "^evt-[a-z0-9-]+$",
+      "description": "Id of the matching Knowledge Engine taxonomy entry; null when kind=unknown or none."
+    },
+    "notes": {
+      "type": ["string", "null"],
+      "default": null,
+      "description": "Honest classification notes, e.g. what could not be concluded."
+    }
+  }
+}

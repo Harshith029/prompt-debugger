@@ -1,0 +1,71 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+*.egg
+.eggs/
+dist/
+build/
+sdist/
+wheels/
+*.so
+.installed.cfg
+MANIFEST
+
+# ---- Virtual environments ----
+.venv/
+venv/
+env/
+ENV/
+.python-version
+
+# ---- Tooling caches ----
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.tox/
+.nox/
+.cache/
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+.hypothesis/
+
+# ---- Local prompt-debugger data (never commit user prompt history) ----
+.prompt-debugger/
+
+# ---- Secrets / local environment (defense in depth; never commit) ----
+.env
+.env.*
+*.local.*
+*.pem
+*.key
+secrets.*
+
+# ---- OS ----
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ---- Editors / IDEs ----
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+*.sublime-workspace
+
+# ---- Claude Code local session config (machine-specific) ----
+.claude/settings.local.json
+
+# ---- Misc scratch ----
+*.log
+*.tmp
+*.bak
+*.orig

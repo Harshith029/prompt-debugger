@@ -1,0 +1,13 @@
+{
+  "case_version": 1,
+  "id": "bm-multi-step-bundle",
+  "category": "multi-step",
+  "prompt": "Set up the database schema, then write the migration, also draft the marketing email for the launch, and while you're at it review my resume.",
+  "event": null,
+  "expectations": {
+    "likely_dimensions": ["R4", "R5"],
+    "rewrite_expected": true,
+    "gate_expected": "passed"
+  },
+  "notes": "Two related engineering steps (schema, migration) bundled with two unrelated tasks (marketing email, resume review). R5 unrelated bundling plus R4 scope creep via 'while you're at it'. Recommend splitting."
+}

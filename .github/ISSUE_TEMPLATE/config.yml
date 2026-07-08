@@ -1,0 +1,10 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/Harshith029/prompt-debugger/security/advisories/new
+    about: >-
+      Please report vulnerabilities privately via a GitHub security advisory, not a
+      public issue. See SECURITY.md for what is in scope and what to include.
+  - name: Questions and discussion
+    url: https://github.com/Harshith029/prompt-debugger/discussions
+    about: Ask questions, share ideas, or discuss the architecture.

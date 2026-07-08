@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prompt-debugger.dev/schemas/prompt-tree/v1",
+  "title": "Prompt Tree v1",
+  "description": "Visualization-oriented projection of a Prompt IR: a flat node list with parent references (no schema recursion). See docs/design/prompt-tree.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["tree_version", "source_ir_version", "nodes"],
+  "properties": {
+    "tree_version": { "const": 1 },
+    "source_ir_version": { "type": "integer", "minimum": 1 },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "parent_id", "section", "label", "segment_ids", "annotations"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^n[0-9]+$" },
+          "parent_id": {
+            "type": ["string", "null"],
+            "pattern": "^n[0-9]+$",
+            "description": "null for top-level section nodes. Acyclicity is verifier-enforced."
+          },
+          "section": {
+            "type": "string",
+            "enum": [
+              "context",
+              "objective",
+              "constraints",
+              "examples",
+              "output_format",
+              "success_criteria",
+              "notes"
+            ]
+          },
+          "label": { "type": "string", "minLength": 1 },
+          "segment_ids": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^s[0-9]+$" },
+            "description": "Prompt IR segments this node covers; may be empty for grouping nodes."
+          },
+          "annotations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["finding_id"],
+              "properties": {
+                "finding_id": { "type": "string", "pattern": "^f[0-9]+$" }
+              }
+            },
+            "description": "Findings overlay: which report findings attach to this node."
+          }
+        }
+      }
+    }
+  }
+}

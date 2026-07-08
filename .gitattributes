@@ -1,0 +1,8 @@
+# Normalize line endings to LF for all text files across platforms.
+# Keeps the vendored-core byte comparison stable and CI consistent on Windows/macOS/Linux.
+* text=auto eol=lf
+
+# Explicit binary types (none currently, but future-proofed).
+*.png binary
+*.jpg binary
+*.zip binary

@@ -1,0 +1,13 @@
+{
+  "case_version": 1,
+  "id": "bm-research-market",
+  "category": "research",
+  "prompt": "Research the electric vehicle charging market and tell me what you find.",
+  "event": null,
+  "expectations": {
+    "likely_dimensions": ["R2", "R8", "R9"],
+    "rewrite_expected": true,
+    "gate_expected": "passed"
+  },
+  "notes": "No success criteria (what decision does this inform?), no scope (region, timeframe, segment), no source or depth expectation."
+}

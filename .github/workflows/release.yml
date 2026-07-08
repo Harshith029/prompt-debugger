@@ -1,0 +1,62 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
+jobs:
+  release:
+    name: Prepare release artifact
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dev dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      # Never release a tag that does not pass the full gate.
+      - name: Run full gate
+        run: |
+          ruff check .
+          ruff format --check .
+          mypy
+          python tools/validate_schemas.py --require-jsonschema
+          python tools/check_imports.py
+          python tools/check_links.py
+          python tools/check_plugin_sync.py
+          python benchmarks/run.py validate
+          pytest
+
+      - name: Verify version alignment
+        run: python tools/check_release_version.py "${GITHUB_REF_NAME}"
+
+      - name: Build release artifact
+        run: |
+          mkdir -p dist
+          git archive --format=zip --output "dist/prompt-debugger-${GITHUB_REF_NAME}.zip" HEAD
+          ( cd dist && sha256sum "prompt-debugger-${GITHUB_REF_NAME}.zip" > SHA256SUMS )
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: dist/prompt-debugger-*.zip
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/prompt-debugger-*.zip
+            dist/SHA256SUMS
+          generate_release_notes: true

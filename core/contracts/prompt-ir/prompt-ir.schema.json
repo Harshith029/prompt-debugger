@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prompt-debugger.dev/schemas/prompt-ir/v1",
+  "title": "Prompt IR v1",
+  "description": "Pragmatic intermediate representation of a prompt: typed, verbatim segments. Segmentation, not parsing. See CONTRACT.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["ir_version", "segments", "unsegmented_remainder"],
+  "properties": {
+    "ir_version": { "const": 1 },
+    "segments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "kind", "text"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^s[0-9]+$",
+            "description": "Segment id, unique within the IR."
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "role",
+              "context",
+              "task",
+              "constraint",
+              "example",
+              "output_spec",
+              "success_criteria",
+              "data",
+              "meta",
+              "other"
+            ],
+            "description": "Closed enum in v1; 'other' is the catch-all."
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "description": "MUST be a verbatim substring of the source prompt (enforced by verify, not by schema)."
+          },
+          "note": {
+            "type": ["string", "null"],
+            "default": null,
+            "description": "Optional analyst commentary about this segment."
+          }
+        }
+      }
+    },
+    "unsegmented_remainder": {
+      "type": "boolean",
+      "description": "True when parts of the prompt were intentionally left unsegmented. Full tiling is not required."
+    }
+  }
+}

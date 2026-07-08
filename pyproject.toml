@@ -1,0 +1,44 @@
+[project]
+name = "prompt-debugger"
+version = "0.1.0a0"
+description = "Understand observable AI model behavior and improve prompt quality. Host-neutral core; Claude Code adapter."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [{ name = "The prompt-debugger contributors" }]
+# Runtime dependencies are intentionally empty (stdlib-only). See ADR-0006.
+dependencies = []
+
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+extend-exclude = ["docs", "adapters/claude-code/core"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "S", "C4", "SIM", "PTH", "RUF"]
+ignore = [
+  "S101", # assert is fine in tests; kept globally simple at M0
+]
+
+[tool.mypy]
+strict = true
+python_version = "3.10"
+files = ["src", "tools", "benchmarks", "tests"]
+mypy_path = "src"
+warn_unreachable = true
+
+# jsonschema is a dev-only dependency used by tooling/tests; its stubs are incomplete.
+[[tool.mypy.overrides]]
+module = "jsonschema"
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

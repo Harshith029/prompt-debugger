@@ -1,0 +1,13 @@
+{
+  "case_version": 1,
+  "id": "bm-good-refactor-scoped",
+  "category": "good",
+  "prompt": "You are reviewing a Python module for a data pipeline used by our analytics team. Refactor the function `normalize_records` in etl/normalize.py to reduce its cyclomatic complexity, without changing its public signature or behavior. Keep the existing docstring accurate. Return only the rewritten function plus a one-paragraph summary of what changed. Constraint: standard library only.",
+  "event": null,
+  "expectations": {
+    "likely_dimensions": [],
+    "rewrite_expected": false,
+    "gate_expected": "not_applicable"
+  },
+  "notes": "Well-formed: role, task, scope boundary, output spec, and an explicit constraint. Guards against analyzer false positives on healthy prompts."
+}

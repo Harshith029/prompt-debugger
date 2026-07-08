@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prompt-debugger.dev/schemas/history-record/v1",
+  "title": "History Record v1",
+  "description": "One persisted analysis: an envelope around a Report JSON payload. Stored as one JSON line in history.jsonl. Composite validation: 'report' validates against report.schema.json.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "record_version",
+    "id",
+    "created_at",
+    "raw",
+    "fingerprints",
+    "prompt_redacted",
+    "prompt_raw",
+    "parent_id",
+    "report"
+  ],
+  "properties": {
+    "record_version": { "const": 1 },
+    "id": {
+      "type": "string",
+      "pattern": "^pd-[0-9]{10,17}-[0-9a-f]{8}$",
+      "description": "pd-<epoch-ms>-<uuid4 first 8 hex>; time-ordered and collision-safe (ADR reference in storage CONTRACT)."
+    },
+    "created_at": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?(Z|[+-][0-9]{2}:[0-9]{2})$"
+    },
+    "raw": {
+      "type": "boolean",
+      "description": "True when prompt_raw is populated. Raw records are visibly flagged in listings and reversible via strip-raw."
+    },
+    "fingerprints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["alg", "prompt", "rewrite"],
+      "properties": {
+        "alg": { "const": "hmac-sha256" },
+        "prompt": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "HMAC-SHA256(store_salt, prompt). Store-local only; excluded from default exports."
+        },
+        "rewrite": {
+          "type": ["string", "null"],
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "HMAC of the rewritten prompt; null when no rewrite text exists."
+        }
+      }
+    },
+    "prompt_redacted": {
+      "type": "string",
+      "description": "The prompt after redaction. Always present; the default persisted form."
+    },
+    "prompt_raw": {
+      "type": ["string", "null"],
+      "description": "Unredacted prompt. Populated only after explicit per-save confirmation; removable via strip-raw."
+    },
+    "parent_id": {
+      "type": ["string", "null"],
+      "pattern": "^pd-[0-9]{10,17}-[0-9a-f]{8}$",
+      "description": "Previous revision of the same prompt, forming revision chains for compare/trends."
+    },
+    "report": {
+      "type": "object",
+      "$comment": "Validated against report/report.schema.json (composite validation)."
+    }
+  }
+}

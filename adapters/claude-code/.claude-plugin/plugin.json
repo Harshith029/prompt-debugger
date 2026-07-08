@@ -1,0 +1,9 @@
+{
+  "name": "prompt-debugger",
+  "version": "0.1.0-alpha",
+  "description": "Understand observable Claude behavior (visible safeguard messages, model switches, errors) and improve prompt quality. Local-first; explanations separate observed facts from estimates.",
+  "author": { "name": "The prompt-debugger contributors" },
+  "homepage": "https://github.com/Harshith029/prompt-debugger",
+  "license": "MIT",
+  "keywords": ["prompt-engineering", "prompt-quality", "observability", "claude"]
+}

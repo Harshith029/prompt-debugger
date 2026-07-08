@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prompt-debugger.dev/schemas/knowledge-techniques/v1",
+  "title": "Techniques file v1",
+  "description": "Prompt-engineering techniques for one provider, each traceable to claims.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["file_version", "techniques"],
+  "properties": {
+    "file_version": { "const": 1 },
+    "techniques": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "guidance", "source_claims", "status"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^T[0-9]+$" },
+          "name": { "type": "string", "minLength": 1 },
+          "guidance": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Actionable one-paragraph guidance; extended prose lives in techniques.md under the same id."
+          },
+          "source_claims": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^clm-[a-z0-9-]+$" },
+            "description": "Claim ids grounding this technique. May be empty only while status=draft."
+          },
+          "status": { "type": "string", "enum": ["draft", "active", "deprecated"] }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prompt-debugger.dev/schemas/report/v1",
+  "title": "Report JSON v1",
+  "description": "Canonical machine-readable analysis report. Markdown shown to users is a projection of this object. Composite validation: 'ir', 'event', and 'rewrite' are validated against their own contracts (see contracts README).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["report_version", "created_at", "knowledge", "ir", "findings"],
+  "properties": {
+    "report_version": { "const": 1 },
+    "created_at": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?(Z|[+-][0-9]{2}:[0-9]{2})$",
+      "description": "ISO 8601 timestamp."
+    },
+    "knowledge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["knowledge_version", "provider", "rubric_version"],
+      "properties": {
+        "knowledge_version": { "type": "string", "minLength": 1 },
+        "provider": { "type": "string", "minLength": 1 },
+        "rubric_version": { "type": "string", "minLength": 1 }
+      },
+      "description": "Which Knowledge Engine versions produced this report."
+    },
+    "event": {
+      "type": ["object", "null"],
+      "$comment": "Validated against events/observable-event.schema.json (composite validation).",
+      "default": null
+    },
+    "ir": {
+      "type": "object",
+      "$comment": "Validated against prompt-ir/prompt-ir.schema.json (composite validation)."
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "dimension", "severity", "evidence", "explanation", "fix"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^f[0-9]+$" },
+          "dimension": {
+            "type": "string",
+            "pattern": "^R[0-9]+$",
+            "description": "Rubric dimension id from the Knowledge Engine rubric pack."
+          },
+          "severity": { "type": "string", "enum": ["high", "medium", "low"] },
+          "evidence": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["segment", "quote"],
+              "properties": {
+                "segment": {
+                  "type": ["string", "null"],
+                  "pattern": "^s[0-9]+$",
+                  "description": "IR segment id; null when the quote falls in unsegmented remainder."
+                },
+                "quote": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "MUST be a verbatim substring of the source prompt (verifier-enforced)."
+                }
+              }
+            }
+          },
+          "explanation": { "type": "string", "minLength": 1 },
+          "fix": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "estimates": {
+      "type": ["array", "null"],
+      "default": null,
+      "description": "Present only when an event was reported. Hypotheses, never facts.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["hypothesis", "confidence", "reasoning"],
+        "properties": {
+          "hypothesis": { "type": "string", "minLength": 1 },
+          "confidence": { "type": "string", "enum": ["high", "medium", "low"] },
+          "reasoning": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "rewrite": {
+      "type": ["object", "null"],
+      "$comment": "Validated against rewrite-report/rewrite-report.schema.json (composite validation).",
+      "default": null
+    }
+  }
+}

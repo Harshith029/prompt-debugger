@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prompt-debugger.dev/schemas/knowledge-rubric/v1",
+  "title": "Rubric file v1",
+  "description": "Provider-neutral prompt-quality rubric. Dimensions map to techniques for fixes.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["file_version", "rubric_version", "dimensions"],
+  "properties": {
+    "file_version": { "const": 1 },
+    "rubric_version": {
+      "type": "string",
+      "pattern": "^[0-9]{4}\\.[0-9]{2}(-[a-z0-9]+)?$"
+    },
+    "dimensions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "detects", "techniques", "severity_guidance", "status"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^R[0-9]+$" },
+          "name": { "type": "string", "minLength": 1 },
+          "detects": {
+            "type": "string",
+            "minLength": 1,
+            "description": "What signals this dimension; extended detection prose lives in rubric.md."
+          },
+          "techniques": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^T[0-9]+$" },
+            "description": "Technique ids whose application fixes findings in this dimension."
+          },
+          "severity_guidance": {
+            "type": "string",
+            "minLength": 1,
+            "description": "How to grade high/medium/low. Severity reflects impact on a model's ability to understand intent — never a causal claim about safeguard events."
+          },
+          "status": { "type": "string", "enum": ["draft", "active", "deprecated"] }
+        }
+      }
+    }
+  }
+}

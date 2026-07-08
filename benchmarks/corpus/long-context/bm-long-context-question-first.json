@@ -1,0 +1,13 @@
+{
+  "case_version": 1,
+  "id": "bm-long-context-question-first",
+  "category": "long-context",
+  "prompt": "What are the three biggest risks? [then 40 pages of an annual report pasted below] ...",
+  "event": null,
+  "expectations": {
+    "likely_dimensions": ["R6"],
+    "rewrite_expected": true,
+    "gate_expected": "passed"
+  },
+  "notes": "Question precedes a very long document. Documented ordering places long material first and the question last; also a candidate for quote-grounding. Primarily an R6 formatting/ordering issue."
+}

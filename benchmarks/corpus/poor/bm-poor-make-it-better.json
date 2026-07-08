@@ -1,0 +1,13 @@
+{
+  "case_version": 1,
+  "id": "bm-poor-make-it-better",
+  "category": "poor",
+  "prompt": "make this better and also fix the other thing, keep it short but explain everything in full detail, thanks",
+  "event": null,
+  "expectations": {
+    "likely_dimensions": ["R1", "R2", "R3", "R8", "R10"],
+    "rewrite_expected": true,
+    "gate_expected": "passed"
+  },
+  "notes": "Multiple simultaneous defects: undefined referents ('this', 'the other thing'), no context, a direct contradiction (short vs full detail), no objective, no output spec."
+}

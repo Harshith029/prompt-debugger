@@ -1,0 +1,75 @@
+{
+  "file_version": 1,
+  "techniques": [
+    {
+      "id": "T1",
+      "name": "Be clear and direct",
+      "guidance": "Apply the colleague test: if a colleague with minimal context would be confused, so will the model. State the desired output explicitly; replace vague quantifiers with measures.",
+      "source_claims": ["clm-pe-best-practices"],
+      "status": "draft"
+    },
+    {
+      "id": "T2",
+      "name": "Add context and motivation",
+      "guidance": "State who the output is for, what it enables, and why constraints exist. Give the reason, not only the request — models connect tasks to relevant knowledge through stated intent.",
+      "source_claims": ["clm-pe-best-practices", "clm-fable-deprescription"],
+      "status": "draft"
+    },
+    {
+      "id": "T3",
+      "name": "Use examples (multishot)",
+      "guidance": "Provide 3-5 relevant, diverse examples wrapped in example tags when output style or structure matters. Examples steer format more reliably than descriptions.",
+      "source_claims": ["clm-pe-best-practices"],
+      "status": "draft"
+    },
+    {
+      "id": "T4",
+      "name": "Structure with XML tags",
+      "guidance": "Separate instructions, context, input data, and examples with consistent, descriptive tags so no text is ambiguous between 'instruction' and 'material to operate on'.",
+      "source_claims": ["clm-pe-best-practices"],
+      "status": "draft"
+    },
+    {
+      "id": "T5",
+      "name": "Give the model a role",
+      "guidance": "A one-sentence role statement focuses behavior and tone for the domain.",
+      "source_claims": ["clm-pe-best-practices"],
+      "status": "draft"
+    },
+    {
+      "id": "T6",
+      "name": "Order long context correctly",
+      "guidance": "Place long documents and data at the top, the query and instructions at the end, and ask for quote-grounding when working over long material.",
+      "source_claims": ["clm-pe-best-practices"],
+      "status": "draft"
+    },
+    {
+      "id": "T7",
+      "name": "Specify output positively",
+      "guidance": "Say what the output should be (format, structure, sections) rather than what it should not be; match the prompt's own style to the desired output style.",
+      "source_claims": ["clm-pe-best-practices"],
+      "status": "draft"
+    },
+    {
+      "id": "T8",
+      "name": "Decompose or chain complex tasks",
+      "guidance": "Split unrelated goals into separate prompts; for dependent multi-step work, state the sequence or chain prompts so intermediate output can be inspected.",
+      "source_claims": ["clm-pe-best-practices"],
+      "status": "draft"
+    },
+    {
+      "id": "T9",
+      "name": "Define success criteria and constraints",
+      "guidance": "State what 'done' looks like and every constraint you actually hold (length, tone, technology, boundaries) so success is checkable from the prompt alone.",
+      "source_claims": ["clm-pe-success-criteria"],
+      "status": "draft"
+    },
+    {
+      "id": "T10",
+      "name": "Avoid over-prescription",
+      "guidance": "Current models follow instructions literally. Replace emphatic scaffolding (ALL CAPS, CRITICAL/MUST chains, exhaustive step lists) with goals and constraints; over-prescription degrades output.",
+      "source_claims": ["clm-fable-deprescription"],
+      "status": "draft"
+    }
+  ]
+}

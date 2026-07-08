@@ -1,0 +1,13 @@
+{
+  "case_version": 1,
+  "id": "bm-ambiguous-optimize",
+  "category": "ambiguous",
+  "prompt": "Optimize the query so it runs better.",
+  "event": null,
+  "expectations": {
+    "likely_dimensions": ["R1", "R2", "R9"],
+    "rewrite_expected": true,
+    "gate_expected": "passed"
+  },
+  "notes": "'the query' has no referent, 'better' has no measure (latency? cost? readability?), and no target system/constraints are given."
+}

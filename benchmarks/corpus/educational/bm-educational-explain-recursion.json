@@ -1,0 +1,13 @@
+{
+  "case_version": 1,
+  "id": "bm-educational-explain-recursion",
+  "category": "educational",
+  "prompt": "Explain recursion.",
+  "event": null,
+  "expectations": {
+    "likely_dimensions": ["R2", "R9", "R10"],
+    "rewrite_expected": true,
+    "gate_expected": "passed"
+  },
+  "notes": "Teaching task with no audience/level (child? CS undergrad? working dev?), no length or format, no worked-example expectation. Audience is the decisive missing context."
+}

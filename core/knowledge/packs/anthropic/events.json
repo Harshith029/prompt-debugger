@@ -1,0 +1,78 @@
+{
+  "file_version": 1,
+  "taxonomy_version": "2026.07-draft",
+  "entries": [
+    {
+      "id": "evt-refusal-visible",
+      "kind": "refusal_message",
+      "title": "Visible safeguard / refusal message",
+      "user_sees": "A message declining or redirecting the request, often mentioning that it cannot help with the request as phrased.",
+      "surfaces": ["claude_ai", "claude_code", "api", "other", "unspecified"],
+      "api_correlate": "On the API this class of outcome corresponds to a response with stop_reason 'refusal', optionally with a stop_details category.",
+      "can_conclude": "That the request, as submitted, produced a decline the user could see. The visible text is the evidence.",
+      "cannot_conclude": "Why it was declined, which specific classifier or rule applied, or any threshold. Do not infer internal moderation logic.",
+      "source_claims": ["clm-refusal-stop-reason", "clm-fable-classifier-scope"],
+      "status": "draft"
+    },
+    {
+      "id": "evt-model-switch-visible",
+      "kind": "model_switch",
+      "title": "Visible model switch after a safeguard event",
+      "user_sees": "An indication that the response was produced by a different model than requested (e.g., a request intended for one model answered by Claude Opus 4.8), sometimes alongside or after a safeguard notice.",
+      "surfaces": ["claude_ai", "claude_code", "unspecified"],
+      "api_correlate": "On the API, a configured fallback surfaces as a content block of type 'fallback' (from/to models) and the response 'model' field names the serving model. Whether a given consumer surface uses this mechanism or displays a switch notice is treated as user-reported observation until clm-consumer-surface-fallback is verified.",
+      "can_conclude": "That the user observed a switch in which model answered. The switch the user saw is a fact about their screen.",
+      "cannot_conclude": "The mechanism a specific consumer surface used, or that a switch always follows a decline. Cite only the documented API mechanism; attribute the surface behavior to the user's report.",
+      "source_claims": ["clm-fallback-block", "clm-fable-classifier-scope", "clm-consumer-surface-fallback"],
+      "status": "draft"
+    },
+    {
+      "id": "evt-api-refusal-stop-reason",
+      "kind": "api_refusal_stop_reason",
+      "title": "API stop_reason: refusal",
+      "user_sees": "A JSON response with stop_reason 'refusal' and possibly a stop_details object.",
+      "surfaces": ["api"],
+      "api_correlate": "stop_reason 'refusal'; stop_details.category among documented values or null.",
+      "can_conclude": "That the API declined this request and, if present, the documented category label.",
+      "cannot_conclude": "The classifier internals behind the category, or thresholds. category may be null even on a refusal.",
+      "source_claims": ["clm-refusal-stop-reason"],
+      "status": "draft"
+    },
+    {
+      "id": "evt-api-fallback-block",
+      "kind": "api_fallback_block",
+      "title": "API fallback content block",
+      "user_sees": "A content block of type 'fallback' with from/to model fields; the response 'model' names the serving model.",
+      "surfaces": ["api"],
+      "api_correlate": "Documented fallback content block.",
+      "can_conclude": "That a configured fallback served the response and which model did.",
+      "cannot_conclude": "That fallback implies a policy decline in every case, or any internal routing detail.",
+      "source_claims": ["clm-fallback-block"],
+      "status": "draft"
+    },
+    {
+      "id": "evt-user-visible-error",
+      "kind": "error",
+      "title": "User-visible error",
+      "user_sees": "An error such as rate limit, request too large, overloaded, or a max_tokens / context-window stop.",
+      "surfaces": ["claude_ai", "claude_code", "api", "other", "unspecified"],
+      "api_correlate": "Documented HTTP error codes and stop reasons (max_tokens, model_context_window_exceeded).",
+      "can_conclude": "The documented meaning of the specific error code or stop reason the user saw.",
+      "cannot_conclude": "Provider-side capacity state or anything beyond the documented meaning.",
+      "source_claims": ["clm-api-errors"],
+      "status": "draft"
+    },
+    {
+      "id": "evt-none",
+      "kind": "none",
+      "title": "No observable event",
+      "user_sees": "Nothing unusual; a pure prompt-quality review with no event reported.",
+      "surfaces": ["unspecified"],
+      "api_correlate": null,
+      "can_conclude": "That the user is asking for prompt-quality help, not event explanation.",
+      "cannot_conclude": "N/A.",
+      "source_claims": [],
+      "status": "draft"
+    }
+  ]
+}

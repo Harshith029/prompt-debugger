@@ -1,0 +1,13 @@
+{
+  "case_version": 1,
+  "id": "bm-coding-add-auth",
+  "category": "coding",
+  "prompt": "Add authentication to my API. Make it secure and production ready and follow best practices.",
+  "event": null,
+  "expectations": {
+    "likely_dimensions": ["R2", "R7", "R9", "R10"],
+    "rewrite_expected": true,
+    "gate_expected": "passed"
+  },
+  "notes": "Legitimate coding task but under-specified: no framework/stack, no auth model (session, JWT, OAuth), and 'best practices' is unmeasurable scaffolding (R7). Language could read as security-adjacent but intent is plainly benign; gate passes."
+}

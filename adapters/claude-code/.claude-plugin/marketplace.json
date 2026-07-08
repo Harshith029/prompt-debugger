@@ -1,0 +1,12 @@
+{
+  "name": "prompt-debugger-marketplace",
+  "Harshith029": { "name": "The prompt-debugger contributors" },
+  "plugins": [
+    {
+      "name": "prompt-debugger",
+      "source": "./",
+      "description": "Understand observable Claude behavior and improve prompt quality. Local-first.",
+      "version": "0.1.0-alpha"
+    }
+  ]
+}

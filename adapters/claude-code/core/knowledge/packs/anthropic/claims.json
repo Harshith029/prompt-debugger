@@ -1,0 +1,77 @@
+{
+  "file_version": 1,
+  "claims": [
+    {
+      "id": "clm-refusal-stop-reason",
+      "claim": "A safeguard decline on the Claude API returns HTTP 200 with stop_reason 'refusal'; a stop_details object may carry a category (documented values include cyber, bio, reasoning_extraction, frontier_llm, or null) and an explanation.",
+      "url": "https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback",
+      "retrieved": "2026-07-07",
+      "status": "recorded",
+      "last_verified": null,
+      "notes": "M1: verify exact category list and stop_details field guarantees against the live page."
+    },
+    {
+      "id": "clm-fallback-block",
+      "claim": "When fallbacks are configured, a content block of type 'fallback' with from/to model fields marks a model switch, and the response 'model' field names the model that served the reply.",
+      "url": "https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback",
+      "retrieved": "2026-07-07",
+      "status": "recorded",
+      "last_verified": null,
+      "notes": null
+    },
+    {
+      "id": "clm-fable-classifier-scope",
+      "claim": "Claude Fable 5 runs safety classifiers targeting offensive cybersecurity, biology/life-sciences content, and extraction of the model's thinking; benign cybersecurity and life-sciences work may also trigger these safeguards, and Anthropic documents fallback to Claude Opus 4.8 as the recovery path.",
+      "url": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5",
+      "retrieved": "2026-07-07",
+      "status": "recorded",
+      "last_verified": null,
+      "notes": "Foundation of the flagship scenario. Quote basis: the page's safeguards note."
+    },
+    {
+      "id": "clm-consumer-surface-fallback",
+      "claim": "Whether and how consumer surfaces (claude.ai, Claude Code) implement automatic fallback after a safeguard decline, and what notice they display, is publicly documented.",
+      "url": "https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback",
+      "retrieved": "2026-07-07",
+      "status": "recorded",
+      "last_verified": null,
+      "notes": "M1 VERIFICATION TASK: this claim is intentionally phrased as a question to resolve. Until verified, taxonomy entries treat surface behavior as user-reported observation only, with citations restricted to the API mechanism."
+    },
+    {
+      "id": "clm-api-errors",
+      "claim": "User-visible API errors are enumerated publicly: 400 invalid_request_error, 401, 403, 404, 413, 429 rate_limit_error, 500, 529 overloaded_error; stop reasons include max_tokens and model_context_window_exceeded.",
+      "url": "https://platform.claude.com/docs/en/api/errors",
+      "retrieved": "2026-07-07",
+      "status": "recorded",
+      "last_verified": null,
+      "notes": null
+    },
+    {
+      "id": "clm-pe-best-practices",
+      "claim": "Anthropic's prompting best-practices reference documents: clear/direct instructions with the colleague-test golden rule; adding context and motivation; 3-5 diverse examples in example tags; XML structuring; role prompting; long-context ordering (data first, query last, quote grounding); positive output-format control; and chaining for inspectable pipelines.",
+      "url": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices",
+      "retrieved": "2026-07-07",
+      "status": "recorded",
+      "last_verified": null,
+      "notes": "Grounds techniques T1, T3, T4, T5, T6, T7, T8."
+    },
+    {
+      "id": "clm-pe-success-criteria",
+      "claim": "Anthropic's prompt-engineering overview establishes defining success criteria and empirical tests as preconditions to prompt engineering.",
+      "url": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/overview",
+      "retrieved": "2026-07-07",
+      "status": "recorded",
+      "last_verified": null,
+      "notes": "Grounds T9."
+    },
+    {
+      "id": "clm-fable-deprescription",
+      "claim": "Anthropic's Fable 5 prompting guidance states that prompts and skills written for prior models are often too prescriptive and can degrade output quality; goals and constraints are preferred over enumerated steps, and 'give the reason, not only the request' improves performance.",
+      "url": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5",
+      "retrieved": "2026-07-07",
+      "status": "recorded",
+      "last_verified": null,
+      "notes": "Grounds T2 and T10."
+    }
+  ]
+}

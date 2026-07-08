@@ -1,0 +1,1 @@
+GENERATED — do not edit. Synced from repo-root core/ by tools/sync_plugin.py.

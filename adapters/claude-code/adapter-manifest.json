@@ -1,0 +1,16 @@
+{
+  "adapter_api_version": 1,
+  "name": "prompt-debugger",
+  "host": "claude-code",
+  "adapter_version": "0.1.0-alpha",
+  "capabilities": ["analyze", "rewrite", "history"],
+  "consumes": {
+    "prompt_ir": 1,
+    "report": 1,
+    "rewrite_report": 1,
+    "observable_event": 1,
+    "storage": 1,
+    "knowledge": 1,
+    "prompt_tree": 1
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "case_version": 1,
+  "id": "bm-creative-short-story",
+  "category": "creative",
+  "prompt": "Write a short story about a lighthouse keeper who discovers something unusual in the fog. Aim for around 800 words, literary tone, present tense.",
+  "event": null,
+  "expectations": {
+    "likely_dimensions": [],
+    "rewrite_expected": false,
+    "gate_expected": "not_applicable"
+  },
+  "notes": "Creative brief that is intentionally open on plot but specifies length, tone, and tense. Tests that the analyzer does not over-flag deliberate creative openness as missing constraints."
+}

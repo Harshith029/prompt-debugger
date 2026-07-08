@@ -1,0 +1,29 @@
+{
+  "file_version": 1,
+  "patterns": [
+    {
+      "id": "pat-name-the-audience",
+      "title": "Name the audience and purpose",
+      "file": "name-the-audience.md",
+      "techniques": ["T2"],
+      "dimensions": ["R2"],
+      "status": "draft"
+    },
+    {
+      "id": "pat-split-unrelated-tasks",
+      "title": "Split unrelated tasks into separate prompts",
+      "file": "split-unrelated-tasks.md",
+      "techniques": ["T8"],
+      "dimensions": ["R5"],
+      "status": "draft"
+    },
+    {
+      "id": "pat-specify-output-shape",
+      "title": "Specify the output shape positively",
+      "file": "specify-output-shape.md",
+      "techniques": ["T7", "T3"],
+      "dimensions": ["R10"],
+      "status": "draft"
+    }
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "file_version": 1,
+  "rubric_version": "2026.07-draft",
+  "dimensions": [
+    {
+      "id": "R1",
+      "name": "Ambiguity",
+      "detects": "Vague referents, undefined terms, phrasing with multiple plausible readings; fails the colleague test.",
+      "techniques": ["T1"],
+      "severity_guidance": "High: the core request has multiple materially different readings. Medium: secondary instructions are ambiguous. Low: minor vagueness unlikely to change the outcome.",
+      "status": "draft"
+    },
+    {
+      "id": "R2",
+      "name": "Missing context",
+      "detects": "Unstated audience, purpose, domain, or intent the reader must guess to respond well.",
+      "techniques": ["T2"],
+      "severity_guidance": "High: purpose/intent absent and the task is uninterpretable without it. Medium: context would clearly change the answer. Low: nice-to-have background missing.",
+      "status": "draft"
+    },
+    {
+      "id": "R3",
+      "name": "Contradictory instructions",
+      "detects": "Mutually exclusive requirements; inconsistent terminology for the same concept.",
+      "techniques": ["T1"],
+      "severity_guidance": "High: instructions directly conflict. Medium: tension requiring the model to prioritize silently. Low: inconsistent naming only.",
+      "status": "draft"
+    },
+    {
+      "id": "R4",
+      "name": "Scope creep",
+      "detects": "Requirements smuggled into asides; 'also / while you're at it' chains that expand the task implicitly.",
+      "techniques": ["T8", "T9"],
+      "severity_guidance": "High: the real scope is materially larger than the stated task. Medium: one or two implicit additions. Low: cosmetic asides.",
+      "status": "draft"
+    },
+    {
+      "id": "R5",
+      "name": "Multiple unrelated tasks",
+      "detects": "Independent goals bundled into one prompt that would each benefit from a dedicated request.",
+      "techniques": ["T8"],
+      "severity_guidance": "High: unrelated goals compete for the response. Medium: related but separable goals. Low: minor secondary ask.",
+      "status": "draft"
+    },
+    {
+      "id": "R6",
+      "name": "Poor formatting",
+      "detects": "Wall-of-text; data and instructions interleaved; long material placed after the question instead of before it.",
+      "techniques": ["T4", "T6"],
+      "severity_guidance": "High: structure actively obscures which text is instruction vs data. Medium: hard to parse but unambiguous. Low: cosmetic.",
+      "status": "draft"
+    },
+    {
+      "id": "R7",
+      "name": "Excessive complexity / over-prescription",
+      "detects": "Micromanaged step lists, redundant emphasis (ALL CAPS, 'CRITICAL'), nested conditionals a goal statement would replace.",
+      "techniques": ["T10"],
+      "severity_guidance": "High: prescription likely to degrade output on current models. Medium: noticeable over-specification. Low: mild redundancy.",
+      "status": "draft"
+    },
+    {
+      "id": "R8",
+      "name": "Weak objective",
+      "detects": "No definition of done; no statement of what a successful response contains.",
+      "techniques": ["T9"],
+      "severity_guidance": "High: success is unknowable from the prompt. Medium: implied but unstated. Low: stated loosely.",
+      "status": "draft"
+    },
+    {
+      "id": "R9",
+      "name": "Missing constraints",
+      "detects": "Length, tone, technology, format, or boundary requirements the user actually has but did not state.",
+      "techniques": ["T9", "T7"],
+      "severity_guidance": "High: unstated constraints will likely invalidate the response. Medium: rework probable. Low: preferences only.",
+      "status": "draft"
+    },
+    {
+      "id": "R10",
+      "name": "Missing output specification",
+      "detects": "No format, structure, or example of the expected answer.",
+      "techniques": ["T7", "T3"],
+      "severity_guidance": "High: output shape matters and is unspecified. Medium: partially specified. Low: format is genuinely flexible.",
+      "status": "draft"
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prompt-debugger.dev/schemas/rewrite-report/v1",
+  "title": "Rewrite Report v1",
+  "description": "Result of a gated rewrite. gate=declined implies text=null (verifier-enforced).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["rewrite_version", "gate", "text", "changes", "notices"],
+  "properties": {
+    "rewrite_version": { "const": 1 },
+    "gate": {
+      "type": "string",
+      "enum": ["passed", "conditional", "declined"],
+      "description": "Outcome of the legitimacy gate. 'conditional' = rewritten, but the same visible behavior may still occur under provider policy and the report says so."
+    },
+    "gate_reason": {
+      "type": ["string", "null"],
+      "default": null,
+      "description": "Required prose when gate != passed: why conditional, or why declined."
+    },
+    "text": {
+      "type": ["string", "null"],
+      "description": "The rewritten prompt. null when gate=declined."
+    },
+    "changes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["change", "technique", "rationale"],
+        "properties": {
+          "change": { "type": "string", "minLength": 1 },
+          "technique": {
+            "type": ["string", "null"],
+            "pattern": "^T[0-9]+$",
+            "description": "Technique id from the Knowledge Engine; null for mechanical edits."
+          },
+          "rationale": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "notices": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": ["non_guarantee", "epistemic", "gate_declined", "gate_conditional"]
+      },
+      "description": "Fixed notices emitted with the rewrite; texts live in the Knowledge Engine notices file."
+    }
+  }
+}
