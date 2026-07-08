@@ -1,5 +1,10 @@
 # prompt-debugger
 
+[![CI](https://github.com/Harshith029/prompt-debugger/actions/workflows/ci.yml/badge.svg)](https://github.com/Harshith029/prompt-debugger/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](pyproject.toml)
+[![Status](https://img.shields.io/badge/status-pre--release%20(M0)-orange.svg)](#project-status)
+
 **Understand what you can see. Improve what you can control.**
 
 `prompt-debugger` is an open-source toolkit that helps you understand **observable** AI model behavior — visible safeguard messages, visible model switches, and user-visible errors — and improve your prompts using published prompt-engineering guidance. The first shipped surface is a [Claude Code](https://code.claude.com) plugin; the analysis engine is host-neutral by design.
@@ -85,7 +90,7 @@ Three ideas do most of the work:
 - **Knowledge as data, not code.** All prompt-engineering guidance lives in a versioned [Knowledge Engine](core/knowledge/README.md) where every factual claim is dated and linked to a public source. Analyzers query it; they never hardcode guidance.
 - **Structured, verifiable output.** Analyses produce a canonical [Report JSON](core/contracts/report/CONTRACT.md); the Markdown you read is a rendered projection. Evidence quotes are verified as verbatim substrings of your prompt, so the tool cannot fabricate evidence undetectably.
 
-The full design, the decisions behind it, and the independent-review trail live in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and [docs/adr/](docs/adr/README.md).
+The full design and the reasoning behind each significant decision live in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and the [Architecture Decision Records](docs/adr/README.md).
 
 ## Repository structure
 
@@ -144,7 +149,7 @@ If you edit anything under `core/`, run `python tools/sync_plugin.py` afterward 
 
 ## Contributing
 
-Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) first — it covers setup, the local gate, and the non-negotiable principles (honesty over completeness, no bypassing, local-first, knowledge-in-the-engine, host-neutral core). All participation is governed by the [Code of Conduct](CODE_OF_CONDUCT.md). Every milestone passes an independent red-team review before it's considered done; substantial PRs should expect the same scrutiny.
+Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) first — it covers setup, the local gate, and the non-negotiable principles (honesty over completeness, no bypassing, local-first, knowledge-in-the-engine, host-neutral core). All participation is governed by the [Code of Conduct](CODE_OF_CONDUCT.md). Every milestone is validated against a fixed engineering review checklist before it's considered complete; substantial pull requests are held to the same standard.
 
 Good first areas (as the project matures): expanding the benchmark corpus, improving documentation, and — from M1 onward — verifying and extending the Knowledge Engine's claim registry.
 
@@ -161,7 +166,7 @@ Nothing is persisted unless you explicitly save it. Saved records are redacted b
 - Eight versioned, host-neutral contracts with JSON schemas and prose specifications.
 - The Knowledge Engine structure with seed content (rubric, techniques, event taxonomy, dated claim registry) — pending a verification pass in M1.
 - A nine-category benchmark corpus, the full tooling and CI suite, and a passing test suite.
-- Complete architecture documentation, eight ADRs, and the independent-review disposition trail.
+- Complete architecture documentation, including eight Architecture Decision Records.
 
 What does **not** exist yet: the analyzer, the rewriter, and the storage implementation. Those are Milestones M2–M4. This is deliberate — the foundation is built and reviewed before any feature logic.
 

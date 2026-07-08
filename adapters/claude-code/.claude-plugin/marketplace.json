@@ -1,6 +1,6 @@
 {
   "name": "prompt-debugger-marketplace",
-  "Harshith029": { "name": "The prompt-debugger contributors" },
+  "owner": { "name": "The prompt-debugger contributors" },
   "plugins": [
     {
       "name": "prompt-debugger",

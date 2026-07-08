@@ -5,7 +5,7 @@
 
 ## Context
 
-The product's first surface is a Claude Code plugin, but the review flagged (F1) that binding contracts, storage, and tests to skill prompts would lock the project to one host and make tests, storage, and any future surface (CLI, MCP, editor) depend on prose. A flagship open-source project should not be architecturally married to a single host.
+The product's first surface is a Claude Code plugin. Binding contracts, storage, and tests directly to host-specific skill files would lock the project to one host and make tests, storage, and any future surface (CLI, MCP, editor) depend on prose. A project intended to last should not be architecturally married to a single host.
 
 ## Decision
 
@@ -19,7 +19,7 @@ The Plugin/Adapter API contract defines what any adapter must consume and produc
 
 ## Alternatives considered
 
-- **Skills-as-architecture (v0.1).** Rejected per F1: unhostable elsewhere, untestable without a model, storage semantics buried in prose.
+- **Skills as the architecture.** Rejected: unhostable elsewhere, untestable without a model, and storage semantics buried in prose.
 - **Ship multiple host runtimes in v1 (also stand up CLI + MCP now).** Rejected as speculative generality (YAGNI): building adapters for hosts with no validated demand, before the primary UX is proven, is unproven complexity. The *contracts* make those adapters cheap later; that is the property worth having now.
 - **Core library with a runtime dependency (e.g. pydantic) for models/validation.** Rejected in favor of stdlib-only (ADR-0006); the contract subset + a small validator keep the runtime dependency-free.
 

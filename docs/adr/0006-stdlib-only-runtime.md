@@ -17,8 +17,8 @@ Enforcement is behavioral, not aspirational:
 
 ## Alternatives considered
 
-- **Allow a curated runtime dependency set (e.g. pydantic, jsonschema at runtime).** Rejected: every runtime dependency is a supply-chain and install-failure surface; the review (F5) specifically flagged the stdlib/jsonschema tension. A defined schema subset + a small in-repo validator (M2) removes the need.
-- **Grep-based network gate (v0.1).** Rejected per F12 as naive (misses `subprocess`, false positives). Replaced by the AST allowlist plus the runtime socket-block harness.
+- **Allow a curated runtime dependency set (e.g. pydantic, jsonschema at runtime).** Rejected: every runtime dependency is a supply-chain and install-failure surface, which creates a tension with schema validation. A defined schema subset plus a small in-repo validator (M2) removes the need.
+- **Grep-based network gate.** Rejected as naive (misses `subprocess`, and produces false positives). Replaced by the AST import allowlist plus the runtime socket-block harness.
 
 ## Trade-offs
 

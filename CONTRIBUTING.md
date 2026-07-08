@@ -43,7 +43,7 @@ CI runs the same gate on Windows, macOS, and Linux across supported Python versi
 
 ## The review workflow
 
-Every milestone passes an independent red-team review before it's considered done. Findings are recorded with dispositions in [docs/reviews/](docs/reviews/), and no milestone closes with open accepted findings. Substantial PRs should expect the same scrutiny: correctness, security, privacy, edge cases, maintainability, docs, and tests.
+Every milestone is validated against a fixed engineering review checklist before it is considered complete, and no milestone closes with open accepted findings. Substantial pull requests are held to the same standard: correctness, security, privacy, edge cases, maintainability, documentation, and tests.
 
 ## Commits and PRs
 

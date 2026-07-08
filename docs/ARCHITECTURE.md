@@ -1,19 +1,12 @@
-# Prompt Debugger for Claude — Architecture Proposal
+# Prompt Debugger for Claude — Architecture
 
 | | |
 |---|---|
-| **Status** | Approved; **Milestone M0 (engineering foundation) implemented**. Analyzer/rewrite behavior remains future work (M2–M4). |
-| **Version** | 0.2.0 |
-| **Date** | 2026-07-07 |
-| **Authors** | Claude Code (lead engineer/architect) |
-| **Review trail** | `docs/reviews/2026-07-07-codex-architecture-review.md` (19 findings: 16 accepted, 3 partially accepted, 0 rejected). M0 awaits its own independent review. |
+| **Status** | Milestone M0 (engineering foundation) implemented. Analyzer and rewrite behavior are future work (M2–M4). |
+| **Document version** | 1.0 |
+| **Last updated** | 2026-07-07 |
 
-### Revision history
-
-| Version | Date | Change |
-|---|---|---|
-| 0.1.0-draft | 2026-07-07 | Initial proposal (archived: `docs/archive/ARCHITECTURE-v0.1.0-draft.md`) |
-| 0.2.0-draft | 2026-07-07 | Restructured around host-neutral core contracts + adapter layer; added Prompt IR and machine-readable Report JSON; corrected tool-permission model; specified misuse policy/legitimacy gate; hardened privacy defaults (user-local storage, salted fingerprints, redacted exports); storage integrity spec; claim registry with versioned sources; expanded threat model; semantic-quality test suites; release trust; Windows-first portability |
+This document describes the architecture of `prompt-debugger`: its layering, contracts, and the reasoning behind the significant design decisions. Decisions are also captured individually as [Architecture Decision Records](adr/README.md).
 
 ---
 
@@ -82,7 +75,7 @@ Facts the product currently relies on (each becomes a registry entry with its re
 | D5 | **Python 3.10+, stdlib-only at runtime; dev-time tooling unrestricted.** Schema validation via an in-repo subset validator, differentially tested in CI against the real `jsonschema` package (dev dependency). | Zero runtime supply chain; correctness risk of owning a validator bounded by restricting schemas to a defined subset + differential testing. (ADR-0003) |
 | D6 | **Honesty architecture**: Observed vs Estimated separation, confidence labels, fixed epistemic and non-guarantee notices, specified legitimacy gate with transformation rules (§6.6). | The core differentiator; now specified as testable contracts rather than principles. |
 | D7 | **License: MIT (recommended).** | Maximizes adoption for a prose-heavy community project; Apache-2.0 the alternative if a patent grant is wanted. Decision isolated to `LICENSE`, needed at M0. |
-| D8 | **Privacy-hardened defaults**: user-local storage, per-store salted HMAC fingerprints, redacted exports, rare/loud/reversible raw storage. | See §8. Reverses v0.1's project-local default (ADR-0004). |
+| D8 | **Privacy-hardened defaults**: user-local storage, per-store salted HMAC fingerprints, redacted exports, rare/loud/reversible raw storage. | See §8. The default storage location cannot be accidentally committed to a repository (ADR-0004). |
 
 ---
 
@@ -204,9 +197,8 @@ prompt-debugger/
 ├── docs/
 │   ├── ARCHITECTURE.md · INSTALL.md · USAGE.md · PRIVACY.md
 │   ├── SECURITY-REVIEW.md · ETHICS.md · GLOSSARY.md · SOURCES.md
-│   ├── adr/ (ADR-0001 … ADR-0005, template)
-│   ├── reviews/ (per-milestone review dispositions)
-│   └── archive/
+│   ├── adr/ (Architecture Decision Records + template)
+│   └── design/ (component design notes, e.g. Prompt Tree)
 ├── evals/                           # cross-skill semantic suites (§10)
 │   ├── meaning-preservation/ · red-team-rewrite/ · rubric-calibration/
 ├── examples/ (01-ambiguous-prompt · 02-safeguard-event · 03-multi-task · 04-history)
@@ -363,7 +355,7 @@ Schemas are standard **JSON Schema draft 2020-12 restricted to a documented subs
 - **Fingerprints:** `HMAC-SHA256(store_salt, text)` with a per-store random 256-bit salt generated at store init (file mode 0600 where supported). Fingerprints never appear in exports by default.
 - **Concurrency & integrity:** advisory lock file via `fcntl` (POSIX) / `msvcrt.locking` (Windows) shim; appends are a single `os.write` on an `O_APPEND` fd; reads tolerate and report trailing partial lines.
 - **Schema evolution:** per-record `schema_version`; `migrate` upgrades a store (timestamped backup first); `doctor` validates every line and quarantines corrupt/invalid ones to `history.rejects.jsonl` with reasons; `archive` rotates the live file to `archive/history-<date>.jsonl`.
-- **Record content:** as v0.1 (redacted prompt, findings, scores, event, rewrite reference, `parent_id` for revision chains) with: `raw: true` flag when raw text was explicitly stored, and the Report JSON embedded as the payload rather than a parallel structure.
+- **Record content:** a redacted prompt, findings, scores, event, rewrite reference, and `parent_id` for revision chains; a `raw: true` flag marks explicitly-stored raw text, and the Report JSON is embedded as the record payload rather than duplicated as a parallel structure.
 - **Read path treats records as untrusted input** (§7 S10): schema-validate + sanitize before display.
 
 ### 6.9 Portability
@@ -452,17 +444,17 @@ Eval-driven development order preserved: write evals before skill content; basel
 
 ## 12. Milestones and review workflow
 
-Every milestone exits through an independent (Codex) review; findings get a numbered disposition record in `docs/reviews/` (template: the v0.1 review record). No milestone closes with open Accepted items.
+Each milestone is validated against a fixed engineering review checklist — correctness, architecture, security, privacy, edge cases, maintainability, documentation quality, and test coverage — before it is considered complete. A milestone does not close while any accepted finding remains open.
 
 | M | Deliverable | Exit criteria |
 |---|-------------|---------------|
-| M0 | Scaffold: repo structure, LICENSE, README, CONTRIBUTING, CI skeleton, ADR baseline (0001–0005), this document merged | CI green on all 3 OSes; license decision recorded in ADR |
-| M1 | **Core contracts**: all four schemas + subset validator + differential tests; taxonomy + claim registry (every claim sourced/dated, incl. consumer-surface fallback verification); rubric; misuse policy + rewrite contract + notices; fresh plugin-install smoke test | Codex verifies citations and contract coherence; 3-OS install test passes |
+| M0 | Scaffold: repo structure, LICENSE, README, CONTRIBUTING, CI, ADR baseline, this document | CI green on all 3 OSes; license recorded in an ADR |
+| M1 | **Core contracts**: all schemas + subset validator + differential tests; taxonomy + claim registry (every claim sourced/dated, incl. consumer-surface fallback verification); rubric; misuse policy + rewrite contract + notices; fresh plugin-install smoke test | Citations verified against sources; contract coherence checked; 3-OS install test passes |
 | M2 | **Core library**: store/verify/redact/sanitize/render/cli + unit, contract, benchmark suites | Full coverage of §6.8 behaviors incl. locking, doctor, migrate; benchmarks recorded |
 | M3 | **`analyze` + `rewrite` skills** + trigger evals + adversarial/injection/meaning-preservation/rubric-calibration suites | Golden + adversarial evals pass; gate branches verified; evidence-verification loop works end-to-end |
 | M4 | **`history` skill** wiring + privacy verifications | Raw-storage UX (rare/loud/reversible) verified; export redaction verified; permission-profile contract green |
 | M5 | Docs (INSTALL/USAGE/PRIVACY/ETHICS/GLOSSARY/SOURCES), examples, packaging, release trust pipeline | Fresh-machine installs on 3 OSes; examples reproduce; release dry-run with checksums + attestations |
-| M6 | Final security/privacy review docs; v1.0.0 | Codex full-repo review; all findings closed |
+| M6 | Final security/privacy review; v1.0.0 | Full-repo security and privacy review complete; all findings closed |
 
 ---
 
@@ -476,14 +468,16 @@ Every milestone exits through an independent (Codex) review; findings get a numb
 
 ---
 
-## 14. Open decisions requiring human approval
+## 14. Resolved foundational decisions
 
-1. **License** — MIT (recommended) vs Apache-2.0. Needed at M0.
-2. **Repository name** — `prompt-debugger` vs `prompt-debugger-for-claude`.
-3. **Command-length UX** — accept `/prompt-debugger:analyze`, or also ship a short `pd` router skill?
-4. **Dev-dependency policy** — confirm dev-only `jsonschema` for differential testing is acceptable (runtime remains stdlib-only).
-5. **Storage default flip** — confirm the review-driven change to user-local default storage with opt-in project-local (reverses v0.1; my recommendation is to confirm).
-6. **Raw-storage confirmation UX** — approve the specific "rare, loud, reversible" mechanism (per-save confirmation + flagged records + `strip-raw`).
+The following decisions are settled and reflected in the M0 implementation:
+
+1. **License** — MIT.
+2. **Repository name** — `prompt-debugger`.
+3. **Command surface** — `/prompt-debugger:analyze` plus a short `pd` alias skill.
+4. **Dependency policy** — the runtime is standard-library only; `jsonschema` is a development-only dependency used for differential schema validation in CI (ADR-0006).
+5. **Storage default** — user-local, with project-local storage available as an explicit, self-ignoring opt-in (ADR-0004).
+6. **Raw-storage handling** — rare, loud, and reversible: per-save confirmation, records flagged in listings, and a `strip-raw` operation to revert to redacted form.
 
 ---
 

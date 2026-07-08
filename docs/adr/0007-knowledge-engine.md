@@ -5,7 +5,7 @@
 
 ## Context
 
-The tool's guidance — the quality rubric, prompt-engineering techniques, the observable-event taxonomy, and the factual claims about provider behavior — must be accurate, auditable, and updatable as provider documentation evolves. If this knowledge is embedded in analyzer code or skill prose, it cannot be versioned independently, cannot be audited to sources, and cannot be extended to new providers without code changes. The review also required (F6) versioned sources with retrieval dates and graceful handling of undocumented events.
+The tool's guidance — the quality rubric, prompt-engineering techniques, the observable-event taxonomy, and the factual claims about provider behavior — must be accurate, auditable, and updatable as provider documentation evolves. If this knowledge is embedded in analyzer code or skill prose, it cannot be versioned independently, cannot be audited to sources, and cannot be extended to new providers without code changes. The design also requires versioned sources with retrieval dates and graceful handling of undocumented events.
 
 ## Decision
 

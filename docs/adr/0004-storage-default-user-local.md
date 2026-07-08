@@ -5,7 +5,7 @@
 
 ## Context
 
-History must be saved somewhere. The v0.1 draft defaulted to a project-local `.prompt-debugger/` directory. The review flagged (F10) that a project-local default risks accidental commits of prompt history — potentially sensitive text — into shared repositories.
+History must be saved somewhere. A project-local default directory (for example `.prompt-debugger/` inside the working repository) risks accidental commits of prompt history — potentially sensitive text — into shared repositories.
 
 ## Decision
 
@@ -13,7 +13,7 @@ Default storage is **user-local**: `~/.prompt-debugger/stores/<project-key>/`, w
 
 ## Alternatives considered
 
-- **Project-local default (v0.1).** Rejected per F10: too easy to `git add .` prompt history into a shared repo.
+- **Project-local default.** Rejected: too easy to `git add .` prompt history into a shared repository.
 - **User-local only, no project option.** Rejected: some users legitimately want history to travel with a project; forbidding it outright is paternalistic. Opt-in with guardrails serves them safely.
 - **A single global store (not per-project).** Rejected: mixes unrelated projects' history and makes per-project trends meaningless.
 
@@ -27,4 +27,4 @@ Default storage is **user-local**: `~/.prompt-debugger/stores/<project-key>/`, w
 - The default path can never be accidentally committed.
 - Project-local opt-in is safe by construction (self-ignoring).
 - PRIVACY.md documents exact locations so users can inspect and delete data by hand.
-- Reverses the v0.1 open question in favor of the review's recommendation.
+- The default location is safe by construction: it cannot be accidentally committed to a project repository.

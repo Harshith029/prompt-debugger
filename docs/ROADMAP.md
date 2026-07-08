@@ -1,6 +1,6 @@
 # Roadmap
 
-Milestones gate on an independent review; no milestone closes with open accepted findings. Full detail: [ARCHITECTURE.md](ARCHITECTURE.md) §12.
+Each milestone is validated against a fixed engineering review checklist; no milestone closes with open accepted findings. Full detail: [ARCHITECTURE.md](ARCHITECTURE.md) §12.
 
 ## Milestones to v1.0
 

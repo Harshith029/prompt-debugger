@@ -21,10 +21,9 @@ Start here to navigate the project's documentation.
 - [Contracts index](../core/contracts/README.md) — Prompt IR, Report JSON, Rewrite Report, Observable Event, Storage, Knowledge Engine, Plugin/Adapter API, Prompt Tree.
 - [Knowledge Engine](../core/knowledge/README.md) — versioned data packs; the source of all guidance.
 
-## Reviews and process
+## Process and policies
 
 - [Compatibility policy](COMPATIBILITY.md) — versioning and support commitments.
 - [Threat model](THREAT-MODEL.md) and the security process in [SECURITY.md](../SECURITY.md).
 - [Roadmap](ROADMAP.md) — milestones and what's next.
-- [Review dispositions](reviews/) — how independent-review findings were handled.
 - [Prompt Tree design](design/prompt-tree.md) — the visualization data model for future adapters.

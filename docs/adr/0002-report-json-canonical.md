@@ -5,7 +5,7 @@
 
 ## Context
 
-An analysis result must be shown to a human (readable Markdown) *and* be saved, compared across revisions, trended over time, validated, and regression-tested. The v0.1 design produced only Markdown, which the independent review flagged (F2): prose cannot be reliably persisted, diffed, validated, or asserted on.
+An analysis result must be shown to a human (readable Markdown) *and* be saved, compared across revisions, trended over time, validated, and regression-tested. Unstructured Markdown cannot serve as the substrate for those operations: prose cannot be reliably persisted, diffed, schema-validated, or asserted on in tests.
 
 ## Decision
 
@@ -13,7 +13,7 @@ Every analysis produces a **Report JSON** object conforming to the Report contra
 
 ## Alternatives considered
 
-- **Markdown as the artifact (v0.1).** Rejected per F2: unstructured text is not a stable interface for storage, diffing, or testing, and it makes evidence unverifiable.
+- **Markdown as the sole artifact.** Rejected: unstructured text is not a stable interface for storage, diffing, or testing, and it makes evidence unverifiable.
 - **Two independent artifacts (model emits both Markdown and JSON separately).** Rejected: they would drift. One canonical object with a deterministic projection guarantees the human view and the stored view agree.
 - **A binary/columnar store.** Rejected: over-engineered for the volume; JSON Lines is inspectable, diff-friendly, and stdlib-native.
 
