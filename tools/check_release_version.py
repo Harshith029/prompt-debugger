@@ -22,6 +22,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 PLUGIN = REPO / "adapters" / "claude-code" / ".claude-plugin" / "plugin.json"
 MARKET = REPO / "adapters" / "claude-code" / ".claude-plugin" / "marketplace.json"
+ADAPTER = REPO / "adapters" / "claude-code" / "adapter-manifest.json"
 
 
 def main(argv: list[str]) -> int:
@@ -43,6 +44,11 @@ def main(argv: list[str]) -> int:
         if entry_ver != tag:
             name = entry.get("name")
             errors.append(f"marketplace plugin '{name}' version '{entry_ver}' != tag '{tag}'")
+
+    adapter = json.loads(ADAPTER.read_text(encoding="utf-8"))
+    adapter_ver = str(adapter.get("adapter_version", "")).lstrip("v")
+    if adapter_ver != tag:
+        errors.append(f"adapter-manifest.json adapter_version '{adapter_ver}' != tag '{tag}'")
 
     if errors:
         print("Release version check FAILED:", file=sys.stderr)

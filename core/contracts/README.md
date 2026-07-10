@@ -44,9 +44,11 @@ A document is valid only if the envelope **and** every composed sub-document val
 
 ## Integrity rules beyond schemas
 
-Schemas check shape; these semantic rules are enforced by `verify.py` (M2) and asserted by tests:
+Schemas check shape; these semantic rules are enforced by `verify.py` (M2) and asserted by tests. The full catalogue, with identifiers, lives in [docs/CONTRACT-INVARIANTS.md](../../docs/CONTRACT-INVARIANTS.md).
 
-- Every `PromptIR.segments[].text` and every finding `evidence[].quote` must be a **verbatim substring of the source prompt**.
+- Every `PromptIR.segments[].text` and every finding `evidence[].quote` must be a **verbatim substring of its reference prompt** — the original prompt for a live report, or `prompt_redacted` for a report embedded in a persisted `raw: false` record (see PR-1).
 - Finding `evidence[].segment` values must reference existing IR segment ids.
-- `report.rewrite.gate == "declined"` implies `report.rewrite.text == null`.
+- `report.rewrite.gate == "declined"` implies `report.rewrite.text == null`; `report.rewrite.text != null` implies `"non_guarantee"` is in `notices`; `report.rewrite.gate != "passed"` implies `gate_reason != null`.
 - Prompt Tree `segment_ids` must reference existing IR segment ids; `parent_id` must reference an existing node or be null (no cycles).
+- **PR-1 (persisted-record redaction):** a `raw: false` history record has `prompt_raw == null` and carries no secret/PII pattern in any field, including all content-bearing fields of the embedded report. Enforced at write time and by `tests/test_privacy_invariants.py`.
+- **Knowledge provenance:** an `active` technique / event-taxonomy entry must not cite a non-`active` claim (see the Knowledge Engine contract).

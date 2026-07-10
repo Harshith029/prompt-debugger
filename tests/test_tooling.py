@@ -14,6 +14,7 @@ sys.path.insert(0, str(REPO / "tools"))
 import check_imports  # noqa: E402
 import check_links  # noqa: E402
 import check_plugin_sync  # noqa: E402
+import check_versions  # noqa: E402
 import validate_schemas  # noqa: E402
 
 
@@ -32,3 +33,7 @@ def test_schema_subset_and_instances_valid() -> None:
 
 def test_plugin_vendor_in_sync() -> None:
     assert check_plugin_sync.main() == 0
+
+
+def test_versions_consistent() -> None:
+    assert check_versions.main() == 0

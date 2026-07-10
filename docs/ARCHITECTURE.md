@@ -161,6 +161,8 @@ Step 8  OFFER SAVE  Offer /prompt-debugger:history save (validates JSON,
 
 ## 5. Repository structure
 
+This is the **target** layout for the completed project. Entries that arrive in later milestones (for example `docs/INSTALL.md`, `docs/USAGE.md`, `docs/SOURCES.md`, `examples/`, `core/guides/`, and the benchmark store generators) are shown here for orientation and do not all exist in the current pre-release. The `docs/adr/` directory holds the actual Architecture Decision Records; the schema files live under `core/contracts/<name>/` (one directory per contract) rather than a flat `core/schemas/`.
+
 ```
 prompt-debugger/
 ├── README.md · LICENSE · CONTRIBUTING.md · CODE_OF_CONDUCT.md
@@ -284,7 +286,7 @@ A pragmatic intermediate representation — segmentation, not parsing:
   "created_at": "2026-07-07T12:00:00Z",
   "event": {
     "kind": "refusal_message",
-    "surface": "claude_code",
+    "surface": "cli",
     "verbatim": "…",
     "documented_match": "evt-refusal-visible",
     "notes": "kind=unknown when no documented pattern matches"
@@ -406,7 +408,7 @@ Residual-risk statement (SECURITY-REVIEW.md): prompt injection is not fully solv
 ## 9. Performance review
 
 - **Token budget:** SKILL.md files ≤ 300 lines (hard cap 500); trigger keywords front-loaded in descriptions (1,536-char listing cap); contracts loaded stepwise from `core/`; scripts executed, never loaded. Idle plugin cost ≈ three descriptions.
-- **Runtime:** O(n) JSONL scans. **Measured, not asserted:** `benchmarks/` ships synthetic-store generators (10k / 100k records) and a timing harness; thresholds for the size warning come from measurements on the CI matrix, recorded in the benchmark README. Defined max-size behavior: warn at threshold, suggest `archive`.
+- **Runtime:** O(n) JSONL scans. **Measured, not asserted (planned for M2):** alongside the storage implementation, `benchmarks/` will add synthetic-store generators (10k / 100k records) and a timing harness so the size-warning threshold comes from measurements on the CI matrix rather than a guessed constant. The current pre-release ships the prompt corpus and its validator; the store generators and timing harness do not exist yet. Defined max-size behavior: warn at threshold, suggest `archive`.
 - **Latency:** dominated by model reasoning (the product itself); scripts add single-digit milliseconds at realistic sizes (verified by benchmarks).
 
 ---

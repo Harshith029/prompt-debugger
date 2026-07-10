@@ -3,6 +3,7 @@
   "$id": "https://prompt-debugger.dev/schemas/history-record/v1",
   "title": "History Record v1",
   "description": "One persisted analysis: an envelope around a Report JSON payload. Stored as one JSON line in history.jsonl. Composite validation: 'report' validates against report.schema.json.",
+  "$comment": "Redaction invariant PR-1 (verifier-enforced; not schema-expressible): when 'raw' is false, 'prompt_raw' is null AND every free-text field of the whole record — including the embedded report's IR segment text, finding evidence quotes, event verbatim, and rewrite text/changes — has been passed through redaction, so no secret or PII pattern survives anywhere in the record. When 'raw' is false, evidence quotes and IR segment text are verbatim substrings of 'prompt_redacted' (not of the original prompt). See core/contracts/storage/CONTRACT.md and docs/CONTRACT-INVARIANTS.md.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -29,7 +30,7 @@
     },
     "raw": {
       "type": "boolean",
-      "description": "True when prompt_raw is populated. Raw records are visibly flagged in listings and reversible via strip-raw."
+      "description": "Governs the redaction state of the ENTIRE record, not just the prompt. false (default): the record is fully redacted — prompt_raw is null and the embedded report carries only redacted content (invariant PR-1). true: the user explicitly opted into raw storage — prompt_raw is populated and report content fields may contain unredacted text. Raw records are visibly flagged in listings and reversible via strip-raw."
     },
     "fingerprints": {
       "type": "object",
@@ -64,7 +65,7 @@
     },
     "report": {
       "type": "object",
-      "$comment": "Validated against report/report.schema.json (composite validation)."
+      "$comment": "Validated against report/report.schema.json (composite validation). Under invariant PR-1, when the record's 'raw' is false this embedded report is the redacted projection: all content-bearing fields hold redacted text only."
     }
   }
 }

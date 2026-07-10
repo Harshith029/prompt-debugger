@@ -55,7 +55,7 @@
             "minItems": 1,
             "items": {
               "type": "string",
-              "enum": ["claude_ai", "claude_code", "api", "other", "unspecified"]
+              "enum": ["web", "cli", "desktop", "api", "other", "unspecified"]
             }
           },
           "api_correlate": {

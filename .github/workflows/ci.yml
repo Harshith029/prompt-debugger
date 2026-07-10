@@ -43,6 +43,9 @@ jobs:
       - name: Type-check (mypy)
         run: mypy
 
+      - name: Version consistency
+        run: python tools/check_versions.py
+
       - name: Schema validation (subset + instances)
         run: python tools/validate_schemas.py --require-jsonschema
 

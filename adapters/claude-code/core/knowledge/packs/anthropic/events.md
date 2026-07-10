@@ -4,6 +4,8 @@ Extended notes for the entries in [`events.json`](events.json). Ids match. This 
 
 **The honesty rule this file enforces:** for every observation, `can_conclude` is stated as fact tied to a claim; `cannot_conclude` is stated as an explicit boundary. When no entry matches, the outcome is `kind: unknown` (contract-mandated), and the report says: here is what you saw, it matches no documented pattern in taxonomy version X, and no causal claim can be made — followed by ordinary prompt-quality analysis.
 
+**Surface categories.** The core Observable Event contract uses host-neutral surface categories (`web`, `cli`, `desktop`, `api`, `other`, `unspecified`). This provider pack maps Anthropic's product surfaces onto them: the web app → `web`; the Claude Code CLI/agent → `cli`; the direct API → `api`. Product-specific naming stays in this pack, not in the core contract.
+
 ## The flagship scenario (`evt-model-switch-visible`)
 A user's legitimate prompt is declined by Claude Fable 5's safeguards and the reply is visibly produced by Claude Opus 4.8. Handling:
 

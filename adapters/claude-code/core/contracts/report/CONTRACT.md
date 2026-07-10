@@ -15,10 +15,11 @@
 
 ## Invariants (verifier-enforced, beyond schema)
 
-1. Every evidence quote is a substring of the source prompt.
+1. Every evidence quote is a verbatim substring of its **reference prompt**. The reference prompt depends on context: for a **live** report it is the original prompt; for a report **embedded in a persisted `raw: false` history record** it is the redacted prompt (`prompt_redacted`), because persistence redacts all report content (storage invariant PR-1). The substring relationship holds in both contexts against the appropriate reference.
 2. Every `evidence[].segment` id exists in `ir.segments` (or is null).
 3. `estimates != null` ⇒ `event != null`.
 4. Finding ids are unique.
+5. IR segment text follows the same reference-prompt rule as evidence quotes (invariant 1).
 
 ## Compatibility
 

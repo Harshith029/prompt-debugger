@@ -6,7 +6,38 @@ Contract and knowledge-pack versions are tracked independently; bumps are noted 
 
 ## [Unreleased]
 
-_Nothing yet._
+### Milestone M0.1 — stabilization
+Correctness, consistency, and privacy-safety of the M0 foundation. No functional/analyzer
+work; no scope change.
+
+#### Fixed
+- **Privacy (PR-1):** persisted history records embedded the full Report JSON, whose IR
+  segment text and evidence quotes carry verbatim prompt substrings — so a secret scrubbed
+  from `prompt_redacted` could survive in the embedded report. The storage contract now
+  requires redaction of the **entire record** for a `raw: false` save, the `raw` flag's
+  semantics were clarified to govern the whole record, and the invariant is guarded by an
+  executable test (`tests/test_privacy_invariants.py`) with compliant and leak fixtures.
+
+#### Changed
+- **Host-neutral core:** the Observable Event contract's `surface` enum no longer encodes
+  provider product names (`claude_ai`, `claude_code`). It now uses host-neutral categories
+  (`web`, `cli`, `desktop`, `api`, `other`, `unspecified`); the Anthropic pack maps its
+  product surfaces onto them. (Pre-release interface change, permitted under alpha.)
+- Documentation synchronized with implementation: the architecture repository tree is
+  labelled as the target layout, and the performance section marks the benchmark store
+  generators as M2 work rather than present.
+- Report and Prompt IR contracts clarify that the verbatim-substring rule references the
+  redacted prompt inside a persisted `raw: false` record.
+
+#### Added
+- `docs/CONTRACT-INVARIANTS.md` — the catalogue of invariants the schema subset cannot
+  express, each with its enforcement point and test.
+- `tests/test_contract_invariants.py` and `tests/test_privacy_invariants.py` — executable
+  enforcement of the rewrite-report, observable-event, and persisted-redaction invariants.
+- `tools/check_versions.py` — verifies all version-bearing files agree; wired into CI and
+  the local gate. `tools/check_release_version.py` now also checks the adapter manifest.
+- Strengthened knowledge-integrity tests: provider-neutral surface enum, taxonomy surface
+  categories, and the active-cites-active claim-provenance rule.
 
 ## [0.1.0-alpha] — unreleased
 

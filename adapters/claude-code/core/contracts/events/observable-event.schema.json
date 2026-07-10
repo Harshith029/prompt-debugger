@@ -23,8 +23,8 @@
     },
     "surface": {
       "type": "string",
-      "enum": ["claude_ai", "claude_code", "api", "other", "unspecified"],
-      "description": "Where the user observed it. 'other' covers additional hosts; 'unspecified' when the user did not say."
+      "enum": ["web", "cli", "desktop", "api", "other", "unspecified"],
+      "description": "Host-neutral category of surface where the user observed the event. Provider-specific product names (e.g. a particular web app or CLI) are not encoded here — they live in provider knowledge packs. 'other' covers additional host categories; 'unspecified' when the user did not say."
     },
     "verbatim": {
       "type": ["string", "null"],

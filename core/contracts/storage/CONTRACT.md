@@ -20,7 +20,7 @@ Project-local opt-in (`storage_scope: project` **and** `project_local_acknowledg
 
 | Operation | Semantics |
 |---|---|
-| `append` | Validate (schema + composite + verifier invariants) → redact → fingerprint → single atomic write under the store lock. Refuses unvalidated payloads. |
+| `append` | Validate (schema + composite + verifier invariants) → **redact the whole record** → fingerprint → single atomic write under the store lock. Refuses unvalidated payloads. For a default (`raw: false`) save, redaction is applied to **every free-text field of the record, not just the top-level prompt** — including the embedded report's IR segment text, finding evidence quotes, event verbatim, and rewrite text/changes. This closes the leak where a secret scrubbed from `prompt_redacted` could otherwise survive in an unredacted copy inside the embedded report (invariant PR-1). A `raw: true` save is written only after explicit per-save confirmation and stores unredacted content throughout. |
 | `list` | Records in id order; raw records visibly flagged. |
 | `get <id>` | One record. All read paths schema-validate and sanitize records before display (records are untrusted input). |
 | `compare <a> <b>` | Rubric-score delta + unified diff of redacted prompts. |
@@ -34,6 +34,7 @@ Project-local opt-in (`storage_scope: project` **and** `project_local_acknowledg
 
 ## Integrity rules
 
+- **Redaction (invariant PR-1):** a `raw: false` record is fully redacted. `prompt_raw` is null, and no secret or PII pattern survives in any field of the record — including every content-bearing field of the embedded report (IR segment text, finding evidence quotes, event verbatim, rewrite text and change descriptions). In a `raw: false` record, evidence quotes and IR segment text are verbatim substrings of `prompt_redacted`, not of the original prompt. This invariant is not expressible in the schema subset; it is enforced by the storage layer at write time and guarded by an executable test (`tests/test_privacy_invariants.py`). See [docs/CONTRACT-INVARIANTS.md](../../../docs/CONTRACT-INVARIANTS.md).
 - **Locking:** advisory lock file per store (`fcntl` on POSIX, `msvcrt.locking` on Windows) around all writes.
 - **Atomic appends:** one serialized record = one `os.write` on an `O_APPEND` descriptor; readers tolerate and report a trailing partial line.
 - **Ids:** `pd-<epoch-ms>-<uuid4[:8]>` — time-ordered without a dependency (UUIDv7 is not in the 3.10 stdlib).

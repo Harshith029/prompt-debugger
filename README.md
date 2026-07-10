@@ -137,6 +137,7 @@ Run the full local gate before every change; CI runs the same on Windows, macOS,
 ```bash
 ruff check . && ruff format --check .        # lint + format
 mypy                                         # strict type-checking
+python tools/check_versions.py               # version metadata agrees
 python tools/validate_schemas.py --require-jsonschema
 python tools/check_imports.py                # runtime is stdlib-only, no network
 python tools/check_links.py                  # docs links resolve

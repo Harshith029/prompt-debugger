@@ -23,6 +23,7 @@ pip install -r requirements-dev.txt
 ```bash
 ruff check . && ruff format --check .
 mypy
+python tools/check_versions.py
 python tools/validate_schemas.py --require-jsonschema
 python tools/check_imports.py
 python tools/check_links.py

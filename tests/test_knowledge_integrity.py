@@ -79,6 +79,46 @@ def test_events_cite_claims_and_valid_kinds() -> None:
             assert c in claims, f"{e['id']} cites unknown claim {c}"
 
 
+def _event_contract_surfaces() -> set[str]:
+    schema = _load(CONTRACTS / "events" / "observable-event.schema.json")
+    surfaces: set[str] = set(schema["properties"]["surface"]["enum"])
+    return surfaces
+
+
+def test_core_surface_enum_is_provider_neutral() -> None:
+    # EV-3: the host-neutral core must not encode provider product names as surfaces.
+    surfaces = _event_contract_surfaces()
+    for value in surfaces:
+        assert "claude" not in value.lower() and "anthropic" not in value.lower(), (
+            f"core surface enum must be provider-neutral; found '{value}'"
+        )
+
+
+def test_event_surfaces_use_contract_categories() -> None:
+    # EV-3: provider taxonomy surfaces must all be valid host-neutral categories.
+    allowed = _event_contract_surfaces()
+    data = _load(KN / "packs" / "anthropic" / "events.json")
+    for e in data["entries"]:
+        for s in e["surfaces"]:
+            assert s in allowed, f"{e['id']} uses surface '{s}' absent from the core enum"
+
+
+def test_active_entries_cite_only_active_claims() -> None:
+    # KN-2: an active technique/event must not depend on a non-active claim.
+    claims = _load(KN / "packs" / "anthropic" / "claims.json")["claims"]
+    active_claims = {c["id"] for c in claims if c["status"] == "active"}
+    non_active = {c["id"] for c in claims if c["status"] != "active"}
+    for fname in ("techniques.json", "events.json"):
+        data = _load(KN / "packs" / "anthropic" / fname)
+        entries = data.get("techniques") or data.get("entries") or []
+        for entry in entries:
+            if entry["status"] == "active":
+                for c in entry["source_claims"]:
+                    assert c not in non_active or c in active_claims, (
+                        f"active {entry['id']} cites non-active claim {c}"
+                    )
+
+
 def test_pattern_index_references_resolve() -> None:
     techniques = _technique_ids()
     dims = _rubric_ids()
