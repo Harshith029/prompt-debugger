@@ -6,8 +6,8 @@ Each milestone is validated against a fixed engineering review checklist; no mil
 
 | M | Focus | State |
 |---|---|---|
-| **M0** | Engineering foundation: repo, contracts, schemas, Knowledge Engine structure, benchmarks, tooling, tests, ADRs, docs, CI | **complete (this milestone)** |
-| M1 | Knowledge verification pass: verify every claim against its live source, promote to active, author misuse policy + rewrite contract + notices, expand taxonomy prose, populate pattern library, resolve the consumer-surface fallback claim | next |
+| **M0** | Engineering foundation: repo, contracts, schemas, Knowledge Engine structure, benchmarks, tooling, tests, ADRs, docs, CI | **complete** — released as `v0.1.0-alpha`; record: [releases/M0.md](releases/M0.md) |
+| M1 | Knowledge verification pass: verify every claim against its live source, promote to active, author misuse policy + rewrite contract + notices, expand taxonomy prose, populate pattern library, resolve the consumer-surface fallback claim | next — spec: [specs/M1.md](../specs/M1.md) |
 | M2 | Core library: storage (locking, atomic append, doctor, migrate, archive), schema-subset validator, evidence verifier, redaction, sanitization, rendering, CLI + benchmarks | |
 | M3 | `analyze` + `rewrite` skills; trigger evals; adversarial, injection, meaning-preservation, and rubric-calibration suites | |
 | M4 | `history` skill wiring; privacy verifications (raw UX, export redaction, permission profile) | |

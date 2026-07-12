@@ -6,8 +6,17 @@ Contract and knowledge-pack versions are tracked independently; bumps are noted 
 
 ## [Unreleased]
 
-### Milestone M0.1.1 — release polish
-Resolves the verified findings from M0.1 review. No functional/analyzer work; no scope change.
+_Nothing yet._
+
+## [0.1.0-alpha] — 2026-07-12
+
+First public pre-release: the **engineering foundation**. No analyzer, rewrite, or storage
+behavior is implemented yet (those arrive in Milestones M2–M4). This tag bundles the M0
+foundation with the M0.1 and M0.1.1 stabilization passes so the architecture, contracts, and
+knowledge engine can be reviewed in the open. Milestone record: [docs/releases/M0.md](docs/releases/M0.md).
+
+### Stabilization — M0.1.1 (release polish)
+Resolves the verified findings from independent review. No functional/analyzer work; no scope change.
 
 #### Fixed
 - **Architecture accuracy:** the architecture document no longer describes M2 library modules
@@ -33,7 +42,7 @@ Resolves the verified findings from M0.1 review. No functional/analyzer work; no
 - Invariants KN-6 (pattern files exist) and refreshed CV-1/CV-2 test references in
   `docs/CONTRACT-INVARIANTS.md`.
 
-### Milestone M0.1 — stabilization
+### Stabilization — M0.1
 Correctness, consistency, and privacy-safety of the M0 foundation. No functional/analyzer
 work; no scope change.
 
@@ -66,13 +75,8 @@ work; no scope change.
 - Strengthened knowledge-integrity tests: provider-neutral surface enum, taxonomy surface
   categories, and the active-cites-active claim-provenance rule.
 
-## [0.1.0-alpha] — unreleased
+### Foundation — M0
 
-First public pre-release: the **engineering foundation only**. No analyzer, rewrite, or
-storage behavior is implemented yet (those arrive in Milestones M2–M4). This release
-exists so the architecture, contracts, and knowledge engine can be reviewed in the open.
-
-### Added
 - **Repository foundation** separating host-neutral core, adapters, contracts, knowledge,
   benchmarks, evals, tests, tooling, docs, and CI.
 - **Versioned contracts (v1):** Prompt IR, Report JSON, Rewrite Report, Observable Event,

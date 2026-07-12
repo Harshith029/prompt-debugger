@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
-SCAN_DIRS = ["docs", "core", "adapters", "benchmarks", "tools"]
+SCAN_DIRS = ["docs", "core", "adapters", "benchmarks", "tools", "specs"]
 LINK_RE = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
 # Generated/vendored trees are marked with VENDORED.txt; we lint the source, not the copy.
 VENDOR_MARKER = "VENDORED.txt"

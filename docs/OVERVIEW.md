@@ -23,6 +23,7 @@ Start here to navigate the project's documentation.
 
 ## Process and policies
 
+- [M0 milestone record](releases/M0.md) — the permanent engineering record for the foundation, and the [M1 specification](../specs/M1.md) for what comes next.
 - [Compatibility policy](COMPATIBILITY.md) — versioning and support commitments.
 - [Threat model](THREAT-MODEL.md) and the security process in [SECURITY.md](../SECURITY.md).
 - [Roadmap](ROADMAP.md) — milestones and what's next.
