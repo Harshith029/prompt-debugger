@@ -6,6 +6,33 @@ Contract and knowledge-pack versions are tracked independently; bumps are noted 
 
 ## [Unreleased]
 
+### Milestone M0.1.1 — release polish
+Resolves the verified findings from M0.1 review. No functional/analyzer work; no scope change.
+
+#### Fixed
+- **Architecture accuracy:** the architecture document no longer describes M2 library modules
+  (`store`/`schema`/`verify`/`redact`/`sanitize`/`render`/`cli`) in the present tense, and no
+  longer references files that do not exist (`core/sources/claims.yaml`, a flat `core/schemas/`,
+  `core/guides/`, `INSTALL.md`/`SECURITY-REVIEW.md`). §5 now shows the actual current tree with
+  a separate "planned additions" list; the claim registry is correctly located at
+  `core/knowledge/packs/anthropic/claims.json`; M2/M5 components are labelled as future work.
+- **Pattern library integrity:** the three patterns named in the Anthropic pattern index now
+  have authored markdown bodies (Option A); a new integrity test asserts every indexed pattern
+  file exists, so there can be no dangling reference.
+- **Release gate parity:** the release workflow now runs `check_versions.py` (version
+  consistency) as part of a gate identical to PR CI, then additionally verifies the plugin,
+  marketplace, and adapter-manifest versions against the git tag. The release gate is no longer
+  weaker than the PR gate. `check_release_version.py`'s docstring corrected to reflect that it
+  already validates the adapter manifest.
+
+#### Added
+- Concrete composite-validation fixtures and `tests/test_composite_validation.py`: a Report JSON
+  with populated `event` and `rewrite` sub-documents, validated through the full composite chain
+  (report → ir → event → rewrite, and embedded in a history record), plus a case proving a
+  schema-valid-but-invariant-violating rewrite is caught by the reference checker.
+- Invariants KN-6 (pattern files exist) and refreshed CV-1/CV-2 test references in
+  `docs/CONTRACT-INVARIANTS.md`.
+
 ### Milestone M0.1 — stabilization
 Correctness, consistency, and privacy-safety of the M0 foundation. No functional/analyzer
 work; no scope change.

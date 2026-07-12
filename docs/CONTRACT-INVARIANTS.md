@@ -66,13 +66,14 @@ RW-1–RW-3 are checked against fixtures now (both compliant and violating) so t
 | KN-3 | Every event-taxonomy entry's `kind` is a member of the Observable Event contract's `kind` enum. | Contract | `tests/test_knowledge_integrity.py` |
 | KN-4 | Rubric dimensions reference existing technique ids; the pattern index references existing techniques and dimensions. | Contract | `tests/test_knowledge_integrity.py` |
 | KN-5 | The `common` pack is provider-neutral (no `provider`, no direct `clm-*` citations). | Contract | `tests/test_knowledge_integrity.py` |
+| KN-6 | Every pattern named in a pattern index `file` field exists on disk (no dangling references). | Contract | `tests/test_knowledge_integrity.py` |
 
 ## Composite validation
 
 | ID | Invariant | Enforced by | Test |
 |---|---|---|---|
-| CV-1 | A `report` is valid only if the envelope **and** its composed `ir`, `event`, and `rewrite` sub-documents validate against their own schemas. | Validator | `tests/test_privacy_invariants.py` (report + ir), M2 (full) |
-| CV-2 | A `history-record` is valid only if the envelope validates **and** its embedded `report` validates recursively. | Validator | `tests/test_privacy_invariants.py` |
+| CV-1 | A `report` is valid only if the envelope **and** its composed `ir`, `event`, and `rewrite` sub-documents validate against their own schemas. | Validator | `tests/test_composite_validation.py` (populated event + rewrite), `tests/test_privacy_invariants.py` (report + ir) |
+| CV-2 | A `history-record` is valid only if the envelope validates **and** its embedded `report` validates recursively. | Validator | `tests/test_composite_validation.py`, `tests/test_privacy_invariants.py` |
 
 ## Version compatibility
 

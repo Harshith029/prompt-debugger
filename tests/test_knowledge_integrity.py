@@ -130,6 +130,16 @@ def test_pattern_index_references_resolve() -> None:
             assert d in dims, f"{p['id']} references unknown dimension {d}"
 
 
+def test_pattern_files_exist() -> None:
+    # No dangling references: every file named in the pattern index must exist on disk.
+    patterns_dir = KN / "packs" / "anthropic" / "patterns"
+    data = _load(patterns_dir / "index.json")
+    for p in data["patterns"]:
+        assert (patterns_dir / p["file"]).is_file(), (
+            f"{p['id']} references missing file {p['file']}"
+        )
+
+
 def test_no_provider_leak_in_common_pack() -> None:
     # The common pack must stay provider-neutral: no provider field, no anthropic-only ids.
     pack = _load(KN / "packs" / "common" / "pack.json")

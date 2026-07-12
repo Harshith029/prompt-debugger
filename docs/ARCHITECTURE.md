@@ -34,9 +34,9 @@ The primary user journey (confirmed by the maintainer): *a user's legitimate pro
 
 ## 2. Grounding in public documentation
 
-All factual claims about model/API behavior live in a **claim registry** (`core/sources/claims.yaml`): claim ID, exact claim text, source URL, retrieval date, verification status, last-verified date. The registry is versioned; the event taxonomy and rubric carry version identifiers; every generated report records which versions it used. A quarterly re-verification checklist (issue template) keeps the corpus honest as Anthropic's documentation evolves. **The taxonomy is explicitly non-exhaustive**: events that match no documented pattern are classified `unknown` and handled gracefully (§6.5).
+All factual claims about model/API behavior live in a **claim registry** ([`core/knowledge/packs/anthropic/claims.json`](../core/knowledge/packs/anthropic/claims.json)): claim ID, exact claim text, source URL, retrieval date, verification status, last-verified date. The registry is versioned; the event taxonomy and rubric carry version identifiers; every generated report records which versions it used. A quarterly re-verification checklist (issue template) keeps the corpus honest as Anthropic's documentation evolves. **The taxonomy is explicitly non-exhaustive**: events that match no documented pattern are classified `unknown` and handled gracefully (§6.5).
 
-Facts the product currently relies on (each becomes a registry entry with its retrieval date of 2026-07-07):
+Facts the product currently relies on (each is a registry entry retrieved 2026-07-07, currently `status: "recorded"`; the verification pass against live sources is Milestone M1):
 
 - A safeguard decline on the API returns **HTTP 200 with `stop_reason: "refusal"`**, optionally with `stop_details` (`category` values documented to include `"cyber"`, `"bio"`, `"reasoning_extraction"`, `"frontier_llm"`, or `null`; `explanation` not guaranteed). Classifier declines and ordinary model refusals surface through the same stop reason.
 - With fallbacks configured, a **`fallback` content block** (`{type: "fallback", from: {model}, to: {model}}`) marks a model switch, and the response `model` field names the serving model.
@@ -94,23 +94,29 @@ Facts the product currently relies on (each becomes a registry entry with its re
 └───────────────┬───────────────────────────────────────────────────────┘
                 │ reads contracts / invokes library
 ┌───────────────▼───────────────────────────────────────────────────────┐
-│ CORE CONTRACTS  (core/ — versioned, host-neutral artifacts)           │
-│  schemas/     prompt-ir · report · history-record · config            │
-│  taxonomy/    observable-events (versioned; includes `unknown`)       │
-│  rubric/      R1–R10 definitions + severity criteria                  │
-│  policy/      rewrite contract · misuse decision procedure · notices  │
-│  sources/     claims.yaml (claim registry with retrieval dates)       │
+│ CORE CONTRACTS  (core/contracts/ — versioned, host-neutral; exists)   │
+│  prompt-ir · report · rewrite-report · events · storage               │
+│  knowledge · plugin-api · prompt-tree                                 │
+│  (each: schema + prose CONTRACT.md; invariants catalogued in          │
+│   docs/CONTRACT-INVARIANTS.md)                                        │
+│                                                                       │
+│ KNOWLEDGE ENGINE  (core/knowledge/ — versioned data packs; exists)    │
+│  common: rubric R1–R10 (+ misuse policy/notices, authored in M1)      │
+│  anthropic: claims.json registry · techniques · event taxonomy        │
+│             · pattern library                                         │
 └───────────────┬───────────────────────────────────────────────────────┘
                 │ validated by / rendered by
 ┌───────────────▼───────────────────────────────────────────────────────┐
 │ CORE LIBRARY  (src/prompt_debugger/ — Python 3.10+, stdlib only)      │
-│  store.py     locking · atomic append · migrate · doctor · archive    │
-│  schema.py    JSON-Schema-subset validator                            │
-│  verify.py    evidence-quote substring verification · IR checks       │
-│  redact.py    secret/PII scrub (typed placeholders)                   │
-│  sanitize.py  control-char/ANSI stripping · CSV formula escaping      │
-│  render.py    Report JSON → Markdown/CSV/JSON exports                 │
-│  cli.py       argparse entry point wrapping all of the above          │
+│  ── implemented in Milestone M2; at M0 the package ships only         │
+│     version constants (__init__.py) and path resolution (paths.py) ── │
+│  store    locking · atomic append · migrate · doctor · archive   (M2) │
+│  schema   JSON-Schema-subset validator                           (M2) │
+│  verify   evidence-quote substring verification · IR checks      (M2) │
+│  redact   secret/PII scrub (typed placeholders)                  (M2) │
+│  sanitize control-char/ANSI stripping · CSV formula escaping     (M2) │
+│  render   Report JSON → Markdown/CSV/JSON exports                (M2) │
+│  cli      argparse entry point wrapping all of the above         (M2) │
 └───────────────┬───────────────────────────────────────────────────────┘
                 ▼
 │ LOCAL STORAGE (user-owned, no network)                                │
@@ -124,7 +130,7 @@ Facts the product currently relies on (each becomes a registry entry with its re
 |---|---|---|---|
 | `analyze` | `/prompt-debugger:analyze [prompt or pasted event]` | user **and** model (triggers on "my prompt was refused", "it switched models", "review my prompt") | Full workflow (§4.2): intake → observe → gate → IR → rubric → estimate → rewrite → offer save |
 | `rewrite` | `/prompt-debugger:rewrite [prompt]` | user and model | Fast path: gate + rewrite + change log + notices |
-| `history` | `/prompt-debugger:history [save\|list\|compare\|trends\|export\|strip-raw\|delete\|purge\|doctor\|archive]` | **user only** (`disable-model-invocation: true`) | Thin wrapper over `cli.py`; persistence is always user-initiated |
+| `history` | `/prompt-debugger:history [save\|list\|compare\|trends\|export\|strip-raw\|delete\|purge\|doctor\|archive]` | **user only** (`disable-model-invocation: true`) | Thin wrapper over the library CLI (M2); persistence is always user-initiated. At M0 the launcher shim exists and reports not-implemented |
 
 Skills link contract documents directly from `core/` (one hop from SKILL.md — the best-practice constraint is chain depth, not directory distance). Scripts import the library via a stable relative path within the installed plugin. Consequence: **supported installs are whole-repo installs** (plugin install, or clone + symlink), documented in the install matrix (§6.9).
 
@@ -161,55 +167,49 @@ Step 8  OFFER SAVE  Offer /prompt-debugger:history save (validates JSON,
 
 ## 5. Repository structure
 
-This is the **target** layout for the completed project. Entries that arrive in later milestones (for example `docs/INSTALL.md`, `docs/USAGE.md`, `docs/SOURCES.md`, `examples/`, `core/guides/`, and the benchmark store generators) are shown here for orientation and do not all exist in the current pre-release. The `docs/adr/` directory holds the actual Architecture Decision Records; the schema files live under `core/contracts/<name>/` (one directory per contract) rather than a flat `core/schemas/`.
+This is the **current** layout, as it exists in the repository today. Planned additions are listed separately below it, tagged with the milestone that delivers them.
 
 ```
 prompt-debugger/
 ├── README.md · LICENSE · CONTRIBUTING.md · CODE_OF_CONDUCT.md
-├── SECURITY.md · CHANGELOG.md
-├── .claude-plugin/
-│   ├── plugin.json                  # manifest; version synced to tags
-│   └── marketplace.json             # pinned to release tags
-├── core/                            # HOST-NEUTRAL CONTRACTS (versioned)
-│   ├── schemas/
-│   │   ├── prompt-ir.schema.json
-│   │   ├── report.schema.json
-│   │   ├── history-record.schema.json
-│   │   └── config.schema.json
-│   ├── taxonomy/
-│   │   └── observable-events.md     # + machine-readable index; taxonomy_version
-│   ├── rubric/
-│   │   └── quality-rubric.md        # R1–R10 + severity criteria; rubric_version
-│   ├── policy/
-│   │   ├── rewrite-contract.md      # allowed/prohibited transformations
-│   │   ├── misuse-policy.md         # decision procedure + refusal templates
-│   │   └── notices.md               # fixed epistemic + non-guarantee texts
-│   ├── guides/
-│   │   ├── rewrite-guide.md         # T1–T10 with worked examples
-│   │   └── output-templates.md      # human report + Report JSON emission
-│   └── sources/
-│       └── claims.yaml              # claim registry
+├── SECURITY.md · CHANGELOG.md · .gitattributes · .gitignore
+├── core/
+│   ├── contracts/                   # 8 versioned contracts: one dir each with
+│   │   ├── prompt-ir/ · report/ · rewrite-report/ · events/
+│   │   ├── storage/ · knowledge/ · plugin-api/ · prompt-tree/
+│   │   └── README.md                # subset rules + composite-validation rules
+│   └── knowledge/                   # KNOWLEDGE ENGINE (versioned data packs)
+│       ├── manifest.json
+│       └── packs/
+│           ├── common/              # rubric.json + rubric.md (R1–R10)
+│           └── anthropic/           # claims.json · techniques(.json/.md)
+│                                    #  · events(.json/.md) · patterns/
 ├── src/prompt_debugger/             # CORE LIBRARY (stdlib-only)
-│   ├── __init__.py · store.py · schema.py · verify.py
-│   ├── redact.py · sanitize.py · render.py · cli.py
-├── skills/                          # ADAPTER: Claude Code plugin skills
-│   ├── analyze/  SKILL.md + evals/evals.json
-│   ├── rewrite/  SKILL.md + evals/evals.json
-│   └── history/  SKILL.md + evals/evals.json + scripts/run.py (launcher shim)
+│   └── __init__.py · paths.py · py.typed     # M0 scope; modules land in M2
+├── adapters/
+│   └── claude-code/                 # the one v1 adapter
+│       ├── .claude-plugin/          # plugin.json · marketplace.json
+│       ├── adapter-manifest.json
+│       ├── skills/                  # analyze · rewrite · history · pd
+│       │                            #  (M0 skeletons; behavior authored M2–M4)
+│       └── core/                    # VENDORED copy of core/ (generated, CI-checked)
+├── benchmarks/                      # 9-category prompt corpus + run.py + case schema
+├── evals/                           # semantic-suite protocols (harnesses land M3)
+├── tools/                           # validate_schemas · check_imports · check_links
+│                                    #  · check_versions · check_release_version
+│                                    #  · sync_plugin · check_plugin_sync · _subset
+├── tests/                           # contract, policy, privacy, corpus, tooling tests
 ├── docs/
-│   ├── ARCHITECTURE.md · INSTALL.md · USAGE.md · PRIVACY.md
-│   ├── SECURITY-REVIEW.md · ETHICS.md · GLOSSARY.md · SOURCES.md
-│   ├── adr/ (Architecture Decision Records + template)
-│   └── design/ (component design notes, e.g. Prompt Tree)
-├── evals/                           # cross-skill semantic suites (§10)
-│   ├── meaning-preservation/ · red-team-rewrite/ · rubric-calibration/
-├── examples/ (01-ambiguous-prompt · 02-safeguard-event · 03-multi-task · 04-history)
-├── tests/                           # pytest: unit + contract + differential
-├── benchmarks/                      # synthetic-store generators + timing harness
+│   ├── ARCHITECTURE.md · CONTRACT-INVARIANTS.md · DATAFLOW.md
+│   ├── GLOSSARY.md · THREAT-MODEL.md · PRIVACY.md · ETHICS.md
+│   ├── ROADMAP.md · COMPATIBILITY.md · OVERVIEW.md
+│   ├── adr/ (0001–0008 + template) · design/ (prompt-tree.md)
 ├── .github/ (workflows/ci.yml · release.yml · ISSUE_TEMPLATE · PR template)
 ├── requirements-dev.txt             # pytest, ruff, mypy, jsonschema (dev only)
 └── pyproject.toml                   # tooling config; no runtime deps
 ```
+
+**Planned additions (do not exist yet):** `core/knowledge/packs/common/` misuse policy, rewrite contract, and notices files (M1); the library modules `store/schema/verify/redact/sanitize/render/cli` (M2); per-skill `evals/evals.json` and the semantic-eval harnesses (M3); `docs/INSTALL.md`, `docs/USAGE.md`, and `examples/` (M5); the benchmark performance harness (`benchmarks/perf/`, M2).
 
 ---
 
@@ -233,7 +233,7 @@ disallowed-tools: Write Edit NotebookEdit Bash
 
 - `disallowed-tools` **removes** write/execute capability from the tool pool while the skill is active — the actual mitigation against injection-steered actions (the restriction clears on the next user message, which matches the analysis lifecycle).
 - `allowed-tools: Read` merely pre-approves reading (e.g., a prompt stored in a file the user points at).
-- A **documented permission profile** ships in INSTALL.md (recommended allow/deny rules for users who want defense in depth at the settings level); CI contract-tests that shipped frontmatter matches the documented profile (§7 S13).
+- The **documented permission profile** is defined today in the contract test (`tests/test_frontmatter.py`), which fails CI if shipped frontmatter drifts from it (§7 S13). A user-facing write-up with recommended allow/deny settings rules is part of `docs/INSTALL.md`, authored in M5.
 
 ### 6.2 `history` frontmatter
 
@@ -273,7 +273,7 @@ A pragmatic intermediate representation — segmentation, not parsing:
 ```
 
 - `kind` enum: `role · context · task · constraint · example · output_spec · data · meta · other`.
-- **Integrity rule:** every `segments[].text` and every finding evidence quote must be a **verbatim substring of the source prompt**. `verify.py` checks this deterministically; a failed check is surfaced to the model for one repair pass, then to the user. This converts "LLM hallucinated its evidence" from an invisible failure into a caught one.
+- **Integrity rule:** every `segments[].text` and every finding evidence quote must be a **verbatim substring of the source prompt**. The verifier (`verify`, M2) checks this deterministically; a failed check is surfaced to the model for one repair pass, then to the user. This converts "LLM hallucinated its evidence" from an invisible failure into a caught one. (Reference checkers for the already-testable invariants exist now — see `docs/CONTRACT-INVARIANTS.md`.)
 - Segmentation may be non-exhaustive (`unsegmented_remainder: true`) — full tiling is not required, avoiding brittleness on unusual prompts.
 
 ### 6.4 Report JSON (`core/schemas/report.schema.json`) — the system of record
@@ -314,7 +314,7 @@ A pragmatic intermediate representation — segmentation, not parsing:
 }
 ```
 
-(Prose annotation above; the shipped schema is strict JSON, subset-conformant.) `event`, `estimates`, and `rewrite` are nullable; `rewrite.gate` ∈ `passed · declined · conditional` (conditional = rewritten, but flagged that the same visible behavior may still occur). The Markdown the user reads is a **projection** of this object; `render.py` can regenerate it, and history/compare/trends operate exclusively on Report JSON.
+(Prose annotation above; the shipped schema is strict JSON, subset-conformant.) `event`, `estimates`, and `rewrite` are nullable; `rewrite.gate` ∈ `passed · declined · conditional` (conditional = rewritten, but flagged that the same visible behavior may still occur). The Markdown the user reads is a **projection** of this object; the renderer (M2) regenerates it, and history/compare/trends operate exclusively on Report JSON.
 
 ### 6.5 Event taxonomy (`core/taxonomy/observable-events.md`)
 
@@ -365,7 +365,7 @@ Schemas are standard **JSON Schema draft 2020-12 restricted to a documented subs
 - **Launchers:** documented order `python3` → `python` → `py -3`; all three pre-approved in `history`'s `allowed-tools`; `run.py` is launcher-agnostic. No Bash-isms in any documented command (plain `python … run.py …` invocations work in Git Bash, PowerShell, and POSIX shells).
 - **Paths:** forward slashes in all skill content; `pathlib` everywhere in the library; no reliance on `HOME` vs `USERPROFILE` (use `pathlib.Path.home()`).
 - **CI matrix:** ubuntu-latest, macos-latest, windows-latest for the full test suite.
-- **Install matrix (INSTALL.md):** (a) plugin install from marketplace (primary); (b) clone + symlink into `~/.claude/skills/` (documented with Windows caveats); copying `skills/` alone is **unsupported** (breaks core/ references) and documented as such.
+- **Install matrix** (user-facing write-up in `docs/INSTALL.md`, authored in M5): (a) plugin install from marketplace (primary); (b) clone + symlink into `~/.claude/skills/` (documented with Windows caveats); copying `skills/` alone is **unsupported** (breaks vendored-core references) and documented as such.
 - **M1 exit criterion:** fresh plugin-install smoke test passes on all three OSes.
 
 ---
@@ -381,14 +381,14 @@ Schemas are standard **JSON Schema draft 2020-12 restricted to a documented subs
 | S5 | **Secrets persisted into history** | Redaction-by-default before persistence; raw storage rare/loud/reversible (§8); self-ignoring project-local stores |
 | S6 | **Supply chain / hidden network I/O** | Zero runtime deps; **AST-based import allowlist** per module (named stdlib modules only — `subprocess`, `socket`, `urllib`, `http` et al. are not on it); **runtime socket-block harness** (test suite runs with `socket.socket` stubbed to raise); policy = *no runtime network I/O* |
 | S7 | **Misuse as a bypass assistant** | Specified gate + transformation rules (§6.6); public ETHICS.md; adversarial red-team eval suite is a release gate |
-| S8 | **Terminal escape / control-character injection** via stored or echoed content | `sanitize.py` strips C0/C1 controls and ANSI CSI sequences from any content the scripts print or export |
+| S8 | **Terminal escape / control-character injection** via stored or echoed content | The sanitizer (`sanitize`, M2) strips C0/C1 controls and ANSI CSI sequences from any content the scripts print or export |
 | S9 | **Export injection** (CSV formulas opened in Excel; markdown/HTML payloads) | CSV cells with leading `= + - @` or tab are prefix-escaped; exports are plain md/csv/json (no HTML in v1); export headers state content provenance |
 | S10 | **Malicious history records** (hand-crafted JSONL) | Read path schema-validates and sanitizes every record; invalid records quarantined by `doctor`; record content never executed or interpolated into commands |
 | S11 | **Plugin update compromise** | Marketplace manifest pinned to release tags; checksums + GitHub artifact attestations (§11); SECURITY.md disclosure process |
 | S12 | **Permission-profile drift** | CI contract test: shipped frontmatter (`allowed-tools`/`disallowed-tools`/`disable-model-invocation`) must equal the documented profile |
 | S13 | **Injection-steered persistence** | `history` is `disable-model-invocation: true` — the model cannot invoke persistence; saves require the user |
 
-Residual-risk statement (SECURITY-REVIEW.md): prompt injection is not fully solvable at the prompt layer; mitigations reduce blast radius (no write/execute tools active, no autonomous persistence) rather than claiming prevention.
+Residual-risk statement (recorded in [docs/THREAT-MODEL.md](THREAT-MODEL.md), which also tracks per-threat implementation status): prompt injection is not fully solvable at the prompt layer; mitigations reduce blast radius (no write/execute tools active, no autonomous persistence) rather than claiming prevention. This table states the mitigation *spec*; threats whose mitigations live in the M2 library are marked accordingly in the threat model.
 
 ---
 
@@ -417,15 +417,15 @@ Residual-risk statement (SECURITY-REVIEW.md): prompt injection is not fully solv
 
 | Layer | What | How | When |
 |---|---|---|---|
-| Unit | `store` (locking, atomic append, migrate, doctor, archive), `schema`, `verify`, `redact` (true/false-positive corpus), `sanitize`, `render`, `cli` | pytest, 3-OS matrix | every PR |
-| Differential | `schema.py` vs `jsonschema` on all schemas + fixture corpus (accept and reject cases) | pytest (dev dep) | every PR |
+| Unit | **Now:** `paths`, tooling entry points. **From M2:** `store` (locking, atomic append, migrate, doctor, archive), `schema`, `verify`, `redact` (true/false-positive corpus), `sanitize`, `render`, `cli` | pytest, 3-OS matrix | every PR |
+| Differential | **Now:** the subset conformance meta-check on every schema. **From M2:** the in-repo subset validator vs `jsonschema` on all schemas + a fixture corpus (accept and reject cases) | pytest (dev dep) | every PR |
 | Contract | frontmatter ↔ documented permission profile; name/description constraints; SKILL.md line caps; one-hop references resolve; no `` !` `` patterns; AST import allowlist; socket-block suite | dedicated checks | every PR |
-| Schema | Report JSON / IR / record / config fixtures validate; evidence-quote verification on golden reports | pytest | every PR |
+| Schema | Report JSON / IR / record / config fixtures validate (now); evidence-quote verification on golden reports (from M2) | pytest | every PR |
 | Skill evals | per-skill `evals.json`: should-trigger / should-not-trigger; golden scenarios (ambiguous prompt → R1; safeguard event → Observed/Estimated separation; unknown event → honest `unknown` handling; injection payload → treated as data) | skill-creator loop + documented manual baseline protocol (fresh session, with/without skill) | release gate + on skill changes |
 | **Meaning preservation** | paired before/after prompts; LLM-judge intent-equivalence rubric with human spot-check; snapshot regressions on golden rewrites | `evals/meaning-preservation/` protocol | release gate |
 | **Red-team rewrite** | laundering attempts (fabricated context, fiction reframing, dilution, salami-slicing, "get it past the filter" asks) must produce `gate: declined` | `evals/red-team-rewrite/` | release gate |
 | **Rubric calibration** | prompts with planted, labeled issues; detection precision/recall per dimension tracked release-over-release | `evals/rubric-calibration/` | release gate |
-| Examples-as-tests | `examples/**` transcripts regenerated per release; drift reviewed | checklist | release gate |
+| Examples-as-tests | `examples/**` transcripts regenerated per release; drift reviewed (examples authored M5) | checklist | release gate |
 
 Eval-driven development order preserved: write evals before skill content; baseline without the skill; write the minimum that passes.
 
@@ -463,7 +463,7 @@ Each milestone is validated against a fixed engineering review checklist — cor
 ## 13. Roadmap (post-v1)
 
 - **v1.1** — trends HTML report (local file, bundled script); config UX polish.
-- **v1.2** — prompt-template library per task family (additional `core/guides/` content).
+- **v1.2** — prompt-template library per task family (additional knowledge-pack content).
 - **v1.3** — **MCP server adapter** binding to the same core contracts/library, for hosts with MCP but no Agent Skills support.
 - **Deferred indefinitely** — browser extension (ADR-0005 conditions).
 - **Continuous** — quarterly claim-registry re-verification (issue template + checklist); taxonomy/rubric version bumps tracked in CHANGELOG.
@@ -485,7 +485,7 @@ The following decisions are settled and reflected in the M0 implementation:
 
 ## 15. Sources
 
-Public documents grounding §2 (each becomes a dated entry in `core/sources/claims.yaml` at M1):
+Public documents grounding §2 (each is a dated entry in [`core/knowledge/packs/anthropic/claims.json`](../core/knowledge/packs/anthropic/claims.json), currently `status: "recorded"`; verified against live sources in M1):
 
 - Claude Code — Skills: `https://code.claude.com/docs/en/skills`
 - Agent Skills — Authoring best practices: `https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices`

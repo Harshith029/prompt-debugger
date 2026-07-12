@@ -26,12 +26,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements-dev.txt
 
-      # Never release a tag that does not pass the full gate.
-      - name: Run full gate
+      # Never release a tag that does not pass the full gate. This runs every check the
+      # pull-request CI gate runs (in the same order), so the release gate is never
+      # weaker than the PR gate — including the version-consistency check.
+      - name: Run full gate (identical to PR CI)
         run: |
           ruff check .
           ruff format --check .
           mypy
+          python tools/check_versions.py
           python tools/validate_schemas.py --require-jsonschema
           python tools/check_imports.py
           python tools/check_links.py
@@ -39,7 +42,9 @@ jobs:
           python benchmarks/run.py validate
           pytest
 
-      - name: Verify version alignment
+      # Release-only: version-bearing files must additionally match the git tag
+      # (internal consistency is already covered by check_versions.py above).
+      - name: Verify version alignment with tag (plugin, marketplace, adapter)
         run: python tools/check_release_version.py "${GITHUB_REF_NAME}"
 
       - name: Build release artifact

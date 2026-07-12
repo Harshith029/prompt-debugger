@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 """Verify that a release tag matches the versions declared in the repository.
 
-Checks the git tag (e.g. v0.1.0) against:
+Checks the git tag (e.g. v0.1.0) against all three adapter version fields:
   - the plugin manifest version (adapters/claude-code/.claude-plugin/plugin.json)
-  - the marketplace manifest version
+  - the marketplace manifest plugin version(s)
+  - the adapter manifest adapter_version (adapters/claude-code/adapter-manifest.json)
 
-pyproject uses PEP 440 versions (e.g. 0.1.0a0 for the 0.1.0-alpha tag), which differ in
-spelling from the git tag, so pyproject is not compared here. The plugin and marketplace
-manifests must match the tag exactly. Fails (exit 1) on any mismatch so a tag can never
-ship inconsistent version metadata.
+pyproject and src/__init__ use PEP 440 versions (e.g. 0.1.0a0 for the 0.1.0-alpha tag),
+which differ in spelling from the git tag, so they are not compared here — their mutual
+consistency is covered by tools/check_versions.py. The three manifests above must match
+the tag exactly. Fails (exit 1) on any mismatch so a tag can never ship inconsistent
+version metadata.
 
 Usage: python tools/check_release_version.py v0.1.0
 """
