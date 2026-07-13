@@ -11,7 +11,13 @@ core/knowledge/
     ├── common/                   # provider-neutral methodology
     │   ├── pack.json             # pack.schema.json
     │   ├── rubric.json           # rubric.schema.json — R-dimensions
-    │   └── rubric.md             # prose companion (human/model reading)
+    │   ├── rubric.md             # prose companion (human/model reading)
+    │   ├── misuse-policy.json    # misuse-policy.schema.json — legitimacy classification
+    │   ├── misuse-policy.md      # prose companion
+    │   ├── rewrite-policy.json   # rewrite-policy.schema.json — transformation rules + guarantees
+    │   ├── rewrite-policy.md     # prose companion
+    │   ├── notices.json          # notices.schema.json — fixed notice texts
+    │   └── notices.md            # prose companion
     └── anthropic/                # provider pack
         ├── pack.json
         ├── claims.json           # claims.schema.json — dated claim registry
@@ -39,7 +45,7 @@ Techniques and rubric dimensions link into the same claim registry via `source_c
 ## Versioning
 
 - `manifest.json` carries `knowledge_version` (e.g. `2026.07-draft`) covering the whole corpus snapshot.
-- Each pack carries `pack_version`; each file carries `file_version` (format version, integer).
+- Each pack carries `pack_version`; each file carries a format version as an integer. Most files spell it `file_version`; the `common`-pack **policy** files (`misuse-policy`, `rewrite-policy`, `notices`) spell it `schema_version` and additionally carry `policy_version` (content version) — schema evolution and policy evolution are independent axes for these files. See [policy-schemas.md](../../../docs/design/policy-schemas.md).
 - Reports pin `knowledge.knowledge_version`, `provider`, and `rubric_version`, so any report is reproducible against the knowledge that produced it.
 - Claims have lifecycle `recorded → verified → stale → retired`; a quarterly re-verification checklist (issue template) drives transitions. `stale`/`retired` claims poison downstream entries: CI warns when an active taxonomy entry or technique cites a non-active claim.
 

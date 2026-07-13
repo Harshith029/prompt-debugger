@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "policy_version": "2026.07-draft",
+  "classes": [
+    {
+      "id": "MISUSE-001",
+      "class": "legitimate",
+      "definition": "A plausible benign reading exists and is consistent with the user's stated purpose and the conversation context; the request is not primarily aimed at defeating a safety system.",
+      "gate_outcome": "passed_or_conditional",
+      "analyzer_action": "Produce a rewrite that makes the stated intent more explicit. Use 'conditional' instead of 'passed' when the report also states that the same visible behavior may still occur under provider policy.",
+      "rationale": "This is the default for good-faith prompts. The gate exists to help a legitimate user communicate intent more clearly, not to gatekeep benign work; distinguishing 'passed' from 'conditional' keeps the tool honest about what a rewrite can and cannot change."
+    },
+    {
+      "id": "MISUSE-002",
+      "class": "ambiguous",
+      "definition": "Purpose is unstated or under-stated and a harmful reading is plausible alongside a benign one, so the legitimate reading cannot be selected with confidence.",
+      "gate_outcome": "elicit",
+      "analyzer_action": "Do not guess. Elicit the purpose per the elicitation rule, treat the answer as stated context, and re-run the procedure. Absent clarification, fail closed: do not produce a rewrite that resolves the ambiguity in the permissive direction.",
+      "rationale": "Guessing in the permissive direction would let the tool launder ambiguous intent on the user's behalf. Ask-don't-guess keeps the decision with the user and preserves the fail-closed principle."
+    },
+    {
+      "id": "MISUSE-003",
+      "class": "prohibited",
+      "definition": "The evident purpose is to bypass, evade, or defeat a safety system, or there is no plausible legitimate reading of the request.",
+      "gate_outcome": "declined",
+      "analyzer_action": "Decline the rewrite using a decline template; still explain the observable event honestly. Do not produce rewritten text.",
+      "rationale": "A rewrite must never make a request more likely to defeat a safeguard. Declining while still explaining the observable event keeps the tool useful for understanding what happened without assisting circumvention."
+    }
+  ],
+  "procedure": [
+    {
+      "id": "MISUSE-010",
+      "description": "Construct the most plausible legitimate reading and the most plausible harmful reading of the request, together with any purpose and context the user has stated.",
+      "rationale": "Dual-reading forces the analyzer to weigh both intents explicitly before judging, instead of pattern-matching a topic or a keyword."
+    },
+    {
+      "id": "MISUSE-011",
+      "description": "Determine whether the request's evident aim includes defeating, evading, or getting content past a safety system, as opposed to accomplishing a benign task.",
+      "rationale": "Safeguard-targeting is the core neutral signal for the prohibited class; it is about intent relative to safeguards, never about subject matter."
+    },
+    {
+      "id": "MISUSE-012",
+      "description": "Determine whether a plausible benign reading exists that is consistent with the stated purpose and context.",
+      "rationale": "The absence of any legitimate reading is itself sufficient for the prohibited class, independent of explicit safeguard-targeting language."
+    },
+    {
+      "id": "MISUSE-013",
+      "description": "Determine whether the stated or clearly implied purpose is sufficient to select the legitimate reading over the harmful one.",
+      "rationale": "Sufficiency separates ambiguous from legitimate: a benign reading that cannot be selected with confidence must be elicited, not assumed."
+    },
+    {
+      "id": "MISUSE-014",
+      "description": "Record the class and the deciding step in the Rewrite Report gate_reason: prohibited when safeguard-targeting is evident or no legitimate reading exists; ambiguous when a harmful reading remains plausible and stated purpose is insufficient to select the legitimate reading; legitimate otherwise.",
+      "rationale": "Recording the class and the step that decided it makes every classification auditable and testable against decision snapshots."
+    }
+  ],
+  "elicitation": {
+    "when": "The request is ambiguous: purpose is unstated or under-stated and a harmful reading is plausible alongside a benign one.",
+    "guidance": "Ask the user what they are trying to accomplish and why, in specific terms. Treat the answer as newly stated context and re-run the procedure from the first step. Do not resolve the ambiguity in the permissive direction on the user's behalf.",
+    "rationale": "A single, explicit ask-don't-guess rule keeps ambiguous cases from silently becoming permissive, and makes the elicitation behavior consistent and testable."
+  },
+  "decline_templates": [
+    {
+      "id": "MISUSE-020",
+      "text": "This request appears aimed at getting around a safety system, so a rewrite is not offered. If that is not your intent, tell me what you are trying to accomplish and why, and I will re-evaluate. The observable event is still explained below.",
+      "rationale": "Covers the safeguard-targeting trigger. Fixed wording keeps the decline stable and testable, and the invitation to restate intent leaves a legitimate user a path forward without the tool guessing."
+    },
+    {
+      "id": "MISUSE-021",
+      "text": "I could not find a legitimate reading of this request that a rewrite could clarify, so a rewrite is not offered. The observable event is still explained below.",
+      "rationale": "Covers the no-legitimate-reading trigger, which is a distinct reason to decline from explicit safeguard-targeting and deserves its own honest wording."
+    }
+  ],
+  "status": "draft"
+}

@@ -3,5 +3,5 @@
   "kind": "common",
   "pack_version": "2026.07-draft",
   "provider": null,
-  "description": "Provider-neutral methodology: the prompt-quality rubric. M1 adds the misuse policy, rewrite transformation rules, and fixed notice texts."
+  "description": "Provider-neutral methodology: the prompt-quality rubric, the misuse policy, the rewrite transformation rules and guarantees, and the fixed notice texts."
 }

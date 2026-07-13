@@ -3,75 +3,75 @@
   "claims": [
     {
       "id": "clm-refusal-stop-reason",
-      "claim": "A safeguard decline on the Claude API returns HTTP 200 with stop_reason 'refusal'; a stop_details object may carry a category (documented values include cyber, bio, reasoning_extraction, frontier_llm, or null) and an explanation.",
+      "claim": "A safeguard decline on the Claude API returns a successful HTTP 200 response with stop_reason 'refusal' and a stop_details object of type 'refusal'; stop_details carries a category (documented values: cyber, bio, frontier_llm, reasoning_extraction) and a human-readable explanation, and both category and explanation are null when the decline maps to no named category. stop_details is null for every stop_reason other than 'refusal'.",
       "url": "https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback",
       "retrieved": "2026-07-07",
-      "status": "recorded",
-      "last_verified": null,
-      "notes": "M1: verify exact category list and stop_details field guarantees against the live page."
+      "status": "verified",
+      "last_verified": "2026-07-12",
+      "notes": "Verified 2026-07-12 against the live page, incl. the category table (cyber, bio, frontier_llm, reasoning_extraction) and the 'both null when unmapped' / 'stop_details null for other stop reasons' rules."
     },
     {
       "id": "clm-fallback-block",
-      "claim": "When fallbacks are configured, a content block of type 'fallback' with from/to model fields marks a model switch, and the response 'model' field names the model that served the reply.",
+      "claim": "When fallbacks are configured, the response's top-level 'model' field names the model that produced the returned message, and a content block of type 'fallback' with from/to model sub-objects ({'type':'fallback','from':{'model':...},'to':{'model':...}}) marks each point where one model's output gives way to the next.",
       "url": "https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback",
       "retrieved": "2026-07-07",
-      "status": "recorded",
-      "last_verified": null,
-      "notes": null
+      "status": "verified",
+      "last_verified": "2026-07-12",
+      "notes": "Verified 2026-07-12; the fallback block shape and top-level 'model' semantics are quoted verbatim on the live page (server-side fallback section)."
     },
     {
       "id": "clm-fable-classifier-scope",
-      "claim": "Claude Fable 5 runs safety classifiers targeting offensive cybersecurity, biology/life-sciences content, and extraction of the model's thinking; benign cybersecurity and life-sciences work may also trigger these safeguards, and Anthropic documents fallback to Claude Opus 4.8 as the recovery path.",
+      "claim": "Claude Fable 5 runs safety classifiers that target offensive cybersecurity techniques, biology and life-sciences content, and extraction of the model's summarized thinking; benign cybersecurity work and beneficial life-sciences tasks may also trigger these safeguards; and Anthropic documents configuring server-side or client-side fallback to Claude Opus 4.8 to re-route declined requests.",
       "url": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5",
       "retrieved": "2026-07-07",
-      "status": "recorded",
-      "last_verified": null,
-      "notes": "Foundation of the flagship scenario. Quote basis: the page's safeguards note."
+      "status": "verified",
+      "last_verified": "2026-07-12",
+      "notes": "Verified 2026-07-12. Refined 'thinking' to 'summarized thinking' to match the live wording. Foundation of the flagship scenario."
     },
     {
       "id": "clm-consumer-surface-fallback",
-      "claim": "Whether and how consumer surfaces (claude.ai, Claude Code) implement automatic fallback after a safeguard decline, and what notice they display, is publicly documented.",
+      "claim": "Anthropic's public refusals-and-fallback documentation specifies only the API-level and SDK fallback mechanisms (the server-side 'fallbacks' parameter, the SDK refusal-fallback middleware, and manual retry). It does not document how consumer product surfaces (for example the web app or the Claude Code CLI) implement automatic fallback after a safeguard decline, nor any user-facing switch notice they display. Consumer-surface fallback behavior is therefore not publicly documented on this page.",
       "url": "https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback",
       "retrieved": "2026-07-07",
-      "status": "recorded",
-      "last_verified": null,
-      "notes": "M1 VERIFICATION TASK: this claim is intentionally phrased as a question to resolve. Until verified, taxonomy entries treat surface behavior as user-reported observation only, with citations restricted to the API mechanism."
+      "status": "verified",
+      "last_verified": "2026-07-12",
+      "notes": "Resolved 2026-07-12 (was the open M1 question). The live page covers only the API/SDK mechanism; it contains no description of consumer-surface fallback behavior or notices. This claim now backs the 'cannot_conclude' boundary of the model-switch taxonomy entry: a user-observed switch is treated as the user's own report, and only the documented API mechanism is cited for what CAN be concluded."
     },
     {
       "id": "clm-api-errors",
-      "claim": "User-visible API errors are enumerated publicly: 400 invalid_request_error, 401, 403, 404, 413, 429 rate_limit_error, 500, 529 overloaded_error; stop reasons include max_tokens and model_context_window_exceeded.",
+      "claim": "User-visible Claude API HTTP errors are enumerated publicly with a type string per status: 400 invalid_request_error, 401 authentication_error, 402 billing_error, 403 permission_error, 404 not_found_error, 409 conflict_error, 413 request_too_large, 429 rate_limit_error, 500 api_error, 504 timeout_error, 529 overloaded_error. Errors are returned as JSON with a top-level 'error' object carrying 'type' and 'message', plus a 'request_id'.",
       "url": "https://platform.claude.com/docs/en/api/errors",
       "retrieved": "2026-07-07",
-      "status": "recorded",
-      "last_verified": null,
-      "notes": null
+      "status": "verified",
+      "last_verified": "2026-07-12",
+      "notes": "Verified 2026-07-12 against the live errors page; the code list here now matches it exactly (previously omitted 402/409/504). The earlier claim also asserted stop reasons 'max_tokens' and 'model_context_window_exceeded' — those are NOT on the errors page (they belong to the stop-reasons page). That sub-clause was removed to keep this claim tied to its source; a dedicated stop-reasons claim is deferred until handling-stop-reasons can be fetched (a WebFetch session limit blocked it on 2026-07-12)."
     },
     {
       "id": "clm-pe-best-practices",
-      "claim": "Anthropic's prompting best-practices reference documents: clear/direct instructions with the colleague-test golden rule; adding context and motivation; 3-5 diverse examples in example tags; XML structuring; role prompting; long-context ordering (data first, query last, quote grounding); positive output-format control; and chaining for inspectable pipelines.",
+      "claim": "Anthropic's prompting best-practices reference documents: clear/direct instructions with the colleague-test golden rule; adding context and motivation behind instructions; using a few diverse examples (multishot) wrapped in example tags; structuring prompts with XML tags; giving Claude a role via the system prompt; long-context ordering (long data first, query last) with quote grounding; controlling output format positively (say what to do, not what not to do); and chaining prompts into inspectable steps.",
       "url": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices",
       "retrieved": "2026-07-07",
-      "status": "recorded",
-      "last_verified": null,
-      "notes": "Grounds techniques T1, T3, T4, T5, T6, T7, T8."
+      "status": "verified",
+      "last_verified": "2026-07-12",
+      "notes": "Verified 2026-07-12 against the live page; all eight techniques are present. Grounds techniques T1, T3, T4, T5, T6, T7, T8."
     },
     {
       "id": "clm-pe-success-criteria",
-      "claim": "Anthropic's prompt-engineering overview establishes defining success criteria and empirical tests as preconditions to prompt engineering.",
+      "claim": "Anthropic's prompt-engineering overview establishes, under 'Before prompt engineering', that a clear definition of success criteria and a way to empirically test against those criteria are prerequisites to prompt engineering.",
       "url": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/overview",
       "retrieved": "2026-07-07",
-      "status": "recorded",
-      "last_verified": null,
-      "notes": "Grounds T9."
+      "status": "verified",
+      "last_verified": "2026-07-12",
+      "notes": "Verified 2026-07-12; the 'Before prompt engineering' list states success criteria and empirical tests as assumptions/preconditions. Grounds T9."
     },
     {
       "id": "clm-fable-deprescription",
-      "claim": "Anthropic's Fable 5 prompting guidance states that prompts and skills written for prior models are often too prescriptive and can degrade output quality; goals and constraints are preferred over enumerated steps, and 'give the reason, not only the request' improves performance.",
+      "claim": "Anthropic's Fable 5 prompting guidance states that skills and prompts developed for prior models are often too prescriptive for Claude Fable 5 and can degrade output quality (review and consider removing older instructions), and that giving the reason behind a request — not only the request — improves performance because context lets the model connect the task to relevant information.",
       "url": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5",
       "retrieved": "2026-07-07",
-      "status": "recorded",
-      "last_verified": null,
-      "notes": "Grounds T2 and T10."
+      "status": "verified",
+      "last_verified": "2026-07-12",
+      "notes": "Verified 2026-07-12; the 'Recommended scaffolding changes' and 'Give the reason, not only the request' sections confirm both parts. Grounds T2 and T10."
     }
   ]
 }

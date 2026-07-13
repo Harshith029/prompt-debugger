@@ -69,6 +69,18 @@ def _instance_pairs() -> list[tuple[Path, Path]]:
             CONTRACTS / "knowledge" / "rubric.schema.json",
         ),
         (
+            KNOWLEDGE / "packs" / "common" / "misuse-policy.json",
+            CONTRACTS / "knowledge" / "misuse-policy.schema.json",
+        ),
+        (
+            KNOWLEDGE / "packs" / "common" / "rewrite-policy.json",
+            CONTRACTS / "knowledge" / "rewrite-policy.schema.json",
+        ),
+        (
+            KNOWLEDGE / "packs" / "common" / "notices.json",
+            CONTRACTS / "knowledge" / "notices.schema.json",
+        ),
+        (
             KNOWLEDGE / "packs" / "anthropic" / "pack.json",
             CONTRACTS / "knowledge" / "pack.schema.json",
         ),

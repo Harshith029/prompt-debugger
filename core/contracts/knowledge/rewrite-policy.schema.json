@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prompt-debugger.dev/schemas/knowledge-rewrite-policy/v1",
+  "title": "Rewrite Policy file v1",
+  "description": "Provider-neutral, declarative catalogue of allowed and prohibited rewrite transformations, the guarantees a rewrite upholds, and which notices attach in which named situations. Descriptive prose and closed enums only; no executable logic, expressions, or branching. Interpreted by the rewrite engine; never executed. The 'rationale' fields are maintainer documentation and must not affect runtime behavior.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "policy_version", "allowed_transformations", "prohibited_transformations", "guarantees", "notice_rules", "status"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "policy_version": {
+      "type": "string",
+      "pattern": "^[0-9]{4}\\.[0-9]{2}(-[a-z0-9]+)?$"
+    },
+    "allowed_transformations": {
+      "type": "array",
+      "minItems": 1,
+      "description": "What a rewrite is permitted to do. Each transformation traces to the technique ids it applies.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "description", "techniques", "rationale"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^RW-[0-9]{3}$",
+            "description": "Stable, permanent registry key. Never reused."
+          },
+          "description": { "type": "string", "minLength": 1 },
+          "techniques": {
+            "type": "array",
+            "description": "Technique ids this transformation applies (provenance to the techniques file). May be empty for purely mechanical edits.",
+            "items": { "type": "string", "pattern": "^T[0-9]+$" }
+          },
+          "rationale": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Maintainer-facing documentation only; must not affect runtime behavior."
+          }
+        }
+      }
+    },
+    "prohibited_transformations": {
+      "type": "array",
+      "minItems": 1,
+      "description": "The intent-laundering checklist (guarantee RG-6): transformations a rewrite must never apply.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "description", "rationale"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^RW-[0-9]{3}$",
+            "description": "Stable, permanent registry key. Never reused."
+          },
+          "description": { "type": "string", "minLength": 1 },
+          "rationale": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Maintainer-facing documentation only; must not affect runtime behavior."
+          }
+        }
+      }
+    },
+    "guarantees": {
+      "type": "array",
+      "minItems": 1,
+      "description": "The rewrite guarantees this policy binds, each linked to an architecture guarantee (RG-*) and tagged with its enforcement mode.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "guarantee_ref", "statement", "mode", "rationale"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^RW-[0-9]{3}$",
+            "description": "Stable, permanent registry key (file-local). Never reused."
+          },
+          "guarantee_ref": {
+            "type": "string",
+            "pattern": "^RG-[0-9]+$",
+            "description": "Link to the architecture guarantee (RG-1..RG-8), distinct from the registry id."
+          },
+          "statement": { "type": "string", "minLength": 1 },
+          "mode": {
+            "type": "string",
+            "enum": ["hard", "judged"],
+            "description": "hard = mechanically checkable and fail-closed; judged = evaluated by a semantic suite with a defined bar."
+          },
+          "rationale": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Maintainer-facing documentation only; must not affect runtime behavior."
+          }
+        }
+      }
+    },
+    "notice_rules": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Which notice attaches in which named situation. A declared association, not a computed condition.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "notice", "applies_when", "rationale"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^RW-[0-9]{3}$",
+            "description": "Stable, permanent registry key. Never reused."
+          },
+          "notice": {
+            "type": "string",
+            "enum": ["non_guarantee", "epistemic", "gate_declined", "gate_conditional"],
+            "description": "The notice to attach; matches the Rewrite Report notices enum exactly."
+          },
+          "applies_when": {
+            "type": "string",
+            "enum": ["rewrite_produced", "event_explained", "gate_declined", "gate_conditional"],
+            "description": "The named situation that triggers the notice. A controlled vocabulary the engine maps to behavior."
+          },
+          "rationale": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Maintainer-facing documentation only; must not affect runtime behavior."
+          }
+        }
+      }
+    },
+    "status": { "type": "string", "enum": ["draft", "active", "deprecated"] }
+  }
+}

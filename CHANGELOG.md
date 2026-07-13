@@ -6,7 +6,45 @@ Contract and knowledge-pack versions are tracked independently; bumps are noted 
 
 ## [Unreleased]
 
-_Nothing yet._
+### Milestone M1 — FR-3 (policy authoring)
+
+Adds the provider-neutral policy layer as declarative data, per
+[docs/design/policy-schemas.md](docs/design/policy-schemas.md). No analyzer, rewrite, or
+storage behavior is implemented (that remains M2–M4); the policy files are inert data the
+future engine will interpret.
+
+#### Added
+- Three additive knowledge schemas under `core/contracts/knowledge/`: `misuse-policy.schema.json`,
+  `rewrite-policy.schema.json`, `notices.schema.json`. Recursion-free subset, `additionalProperties:
+  false` on every object; purely declarative (closed enums and prose only — no branching fields,
+  expressions, or embedded logic).
+- Three `common`-pack policy files plus Markdown companions: `misuse-policy.json`/`.md`
+  (legitimacy classification: three classes, the neutral ordered procedure, the ask-don't-guess
+  elicitation rule, fixed decline templates), `rewrite-policy.json`/`.md` (allowed and prohibited
+  transformations, the RG-1..RG-8 guarantees with hard/judged mode, notice-attachment rules), and
+  `notices.json`/`.md` (fixed notice texts keyed to the Rewrite Report `notices` enum).
+- Every policy entry carries a **stable, permanent registry id** (`MISUSE-###` / `RW-###` /
+  `NOTICE-###`), never reused, distinct from any closed semantic role (`class`, `notice`,
+  `guarantee_ref`).
+- Every policy entry carries a maintainer-facing `rationale`, documented and schema-annotated as
+  **documentation only — not read at runtime**.
+- Policy invariants PL-1..PL-6 in `docs/CONTRACT-INVARIANTS.md`, and integrity tests in
+  `tests/test_knowledge_integrity.py` (id uniqueness/form; three complete classes; `notice`
+  values ⊆ Rewrite Report enum; notice rules resolve to notice texts; technique references and
+  `guarantee_ref`s well-formed; provider-neutrality of the new files).
+- [docs/process/policy-review.md](docs/process/policy-review.md) — maintainer governance for
+  policy evolution: contribution workflow, review and evidence expectations, compatibility and
+  versioning rules, schema evolution discipline, rationale standards, regression requirements,
+  and the approval process. Documentation only; no runtime effect.
+
+#### Changed
+- Policy files use **`schema_version`** (format axis) alongside **`policy_version`** (content
+  axis) to keep schema evolution and policy evolution independent; the knowledge contract records
+  the divergence from the older `file_version` spelling.
+- `core/knowledge/packs/common/pack.json` description updated to present-tense (the policy files
+  now exist); the pack stays on the `2026.07-draft` snapshot.
+- `tools/validate_schemas.py` validates the three new policy files against their schemas;
+  `core/contracts/knowledge/CONTRACT.md` lists them in the structure tree.
 
 ## [0.1.0-alpha] — 2026-07-12
 

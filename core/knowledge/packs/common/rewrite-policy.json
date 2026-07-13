@@ -1,0 +1,177 @@
+{
+  "schema_version": 1,
+  "policy_version": "2026.07-draft",
+  "allowed_transformations": [
+    {
+      "id": "RW-001",
+      "description": "Make the stated audience and purpose explicit, using only context the user actually supplied.",
+      "techniques": ["T2"],
+      "rationale": "Stating the reason behind a request is the single highest-value clarity edit, and it stays within user-supplied facts (RG-7)."
+    },
+    {
+      "id": "RW-002",
+      "description": "Resolve ambiguous referents and undefined terms by naming what the user already identified in the prompt or conversation.",
+      "techniques": ["T1"],
+      "rationale": "Disambiguation increases explicitness (RG-2) without adding goals; it only fixes references the user already made."
+    },
+    {
+      "id": "RW-003",
+      "description": "Separate unrelated bundled tasks into distinct, ordered requests without dropping any task.",
+      "techniques": ["T8"],
+      "rationale": "Splitting for clarity must preserve every goal (RG-1); it must never be used to distribute a prohibited intent across parts (see RW-053)."
+    },
+    {
+      "id": "RW-004",
+      "description": "State the definition of done or success criteria the user implied but did not spell out.",
+      "techniques": ["T9"],
+      "rationale": "A stated objective makes the response checkable; it clarifies the user's own intent rather than inventing a new one."
+    },
+    {
+      "id": "RW-005",
+      "description": "Surface and state constraints the user supplied but left implicit (length, tone, technology, format, boundaries).",
+      "techniques": ["T9"],
+      "rationale": "Constraints the user holds but did not state surface later as 'wrong' answers; making them explicit is clarification, not addition."
+    },
+    {
+      "id": "RW-006",
+      "description": "Specify the expected output shape positively (format, structure, or a placeholder example that asserts no domain content).",
+      "techniques": ["T7"],
+      "rationale": "Positive output specification is a documented technique; the placeholder caveat keeps it within RG-8 (no invented examples read as facts)."
+    },
+    {
+      "id": "RW-007",
+      "description": "Reorganize the prompt so instructions and supplied data are visually separable, placing long material before the question.",
+      "techniques": ["T4", "T6"],
+      "rationale": "Structural clarity follows the documented long-context ordering and does not change meaning; supplied material is preserved (RG-3)."
+    },
+    {
+      "id": "RW-008",
+      "description": "Reduce over-prescription (micromanaged step lists, redundant emphasis) to a clear statement of goals and constraints.",
+      "techniques": ["T10"],
+      "rationale": "Current models follow instructions literally; de-prescribing improves output and removes scaffolding without dropping any requirement."
+    },
+    {
+      "id": "RW-009",
+      "description": "Normalize structure and whitespace for readability with no change to wording or meaning.",
+      "techniques": [],
+      "rationale": "A purely mechanical edit cites no technique; it is listed so the empty techniques array has a legitimate, documented use."
+    }
+  ],
+  "prohibited_transformations": [
+    {
+      "id": "RW-050",
+      "description": "Introduce facts, credentials, authorization, roles, or background the user did not supply.",
+      "rationale": "Fabricated context is the primary form of intent laundering; RG-7 forbids it outright."
+    },
+    {
+      "id": "RW-051",
+      "description": "Reframe the request as fiction, hypothetical, roleplay, or 'for a story' to change how a safety system would read it.",
+      "rationale": "Fictional reframing changes the policy reading without changing the underlying ask; it is prohibited by RG-6."
+    },
+    {
+      "id": "RW-052",
+      "description": "Weaken, euphemize, or dilute the request's evident meaning to make it less legible to a safety system.",
+      "rationale": "Semantic dilution reduces explicitness, the opposite of RG-2, and is a laundering technique under RG-6."
+    },
+    {
+      "id": "RW-053",
+      "description": "Split a request across parts in order to distribute a prohibited intent across pieces that each look benign.",
+      "rationale": "This is the abusive inverse of the legitimate task-splitting in RW-003; intent, not surface, distinguishes them."
+    },
+    {
+      "id": "RW-054",
+      "description": "Encode, cipher, translate, or otherwise obfuscate content to evade detection.",
+      "rationale": "Obfuscation exists only to defeat detection; it has no clarity purpose and is prohibited by RG-6."
+    },
+    {
+      "id": "RW-055",
+      "description": "Invent domain examples or sample data that could be read as user-supplied facts.",
+      "rationale": "Invented examples can smuggle in fabricated context; RG-8 permits only unmistakable placeholders that assert no domain content."
+    }
+  ],
+  "guarantees": [
+    {
+      "id": "RW-080",
+      "guarantee_ref": "RG-1",
+      "statement": "The rewrite's set of task-intents is a superset of the original's and introduces no new task-intent; clarification adds explicitness, not goals.",
+      "mode": "judged",
+      "rationale": "Meaning preservation is semantic and is measured by the meaning-preservation eval suite, bounded by the hard checks RG-6/RG-7; it cannot be proven by a substring check."
+    },
+    {
+      "id": "RW-081",
+      "guarantee_ref": "RG-2",
+      "statement": "Explicitness of stated intent may only increase relative to the original; a rewrite never makes intent less legible.",
+      "mode": "judged",
+      "rationale": "Monotonic explicitness is a semantic property judged by the eval suite; it is the seam between the misuse model and the guarantees."
+    },
+    {
+      "id": "RW-082",
+      "guarantee_ref": "RG-3",
+      "statement": "Embedded material the user supplied is preserved or reorganized, never deleted in a way that changes meaning, nor fabricated.",
+      "mode": "hard",
+      "rationale": "Data and example segments must trace to source spans, which a verifier can decide deterministically."
+    },
+    {
+      "id": "RW-083",
+      "guarantee_ref": "RG-4",
+      "statement": "Every statement in the report is an Observed fact or a labelled Estimate, and the non-guarantee notice is attached whenever a rewrite text exists.",
+      "mode": "hard",
+      "rationale": "Honesty separation and the mandatory notice are mechanically checkable (RW-2)."
+    },
+    {
+      "id": "RW-084",
+      "guarantee_ref": "RG-5",
+      "statement": "Every evidence quote and IR segment text is a verbatim substring of its reference prompt.",
+      "mode": "hard",
+      "rationale": "Substring checking is exact and deterministic (RPT-1, IR-1, PR-1)."
+    },
+    {
+      "id": "RW-085",
+      "guarantee_ref": "RG-6",
+      "statement": "No prohibited transformation is applied: no fictional reframing, semantic dilution, intent-distributing split, or encoding/obfuscation.",
+      "mode": "hard",
+      "rationale": "The prohibited-transformation checklist is enforced as hard checks plus a red-team suite; every laundering fixture must yield a declined gate."
+    },
+    {
+      "id": "RW-086",
+      "guarantee_ref": "RG-7",
+      "statement": "The rewrite introduces no facts, credentials, authorization, roles, or background the user did not supply.",
+      "mode": "hard",
+      "rationale": "Every asserted fact must trace to a source span, which a verifier can decide deterministically."
+    },
+    {
+      "id": "RW-087",
+      "guarantee_ref": "RG-8",
+      "statement": "The rewrite does not fabricate domain examples that could be read as user-supplied facts; only unmistakable, content-free placeholders are permitted.",
+      "mode": "hard",
+      "rationale": "Added example blocks must be placeholder-typed or trace to source, a corollary of RG-7 that a verifier can check."
+    }
+  ],
+  "notice_rules": [
+    {
+      "id": "RW-090",
+      "notice": "non_guarantee",
+      "applies_when": "rewrite_produced",
+      "rationale": "RW-2 makes the non-guarantee notice mandatory whenever a rewrite text exists, so it attaches whenever a rewrite is produced."
+    },
+    {
+      "id": "RW-091",
+      "notice": "gate_conditional",
+      "applies_when": "gate_conditional",
+      "rationale": "The conditional notice states that the same visible behavior may still occur under provider policy, matching the conditional gate outcome."
+    },
+    {
+      "id": "RW-092",
+      "notice": "gate_declined",
+      "applies_when": "gate_declined",
+      "rationale": "The declined notice accompanies a refused rewrite so the user understands no rewritten text was produced."
+    },
+    {
+      "id": "RW-093",
+      "notice": "epistemic",
+      "applies_when": "event_explained",
+      "rationale": "When the report explains an observable event, the epistemic notice marks estimated factors as hypotheses, not facts about provider internals."
+    }
+  ],
+  "status": "draft"
+}

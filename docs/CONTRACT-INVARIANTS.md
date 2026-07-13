@@ -68,6 +68,19 @@ RW-1–RW-3 are checked against fixtures now (both compliant and violating) so t
 | KN-5 | The `common` pack is provider-neutral (no `provider`, no direct `clm-*` citations). | Contract | `tests/test_knowledge_integrity.py` |
 | KN-6 | Every pattern named in a pattern index `file` field exists on disk (no dangling references). | Contract | `tests/test_knowledge_integrity.py` |
 
+## Policy files (common pack)
+
+The `misuse-policy`, `rewrite-policy`, and `notices` files are declarative data (see [policy-schemas.md](design/policy-schemas.md)); these invariants hold across them.
+
+| ID | Invariant | Enforced by | Test |
+|---|---|---|---|
+| PL-1 | Every policy entry carries a stable registry `id` matching its file prefix (`MISUSE-###` / `RW-###` / `NOTICE-###`); ids are unique within a file and are never reused or renumbered. | Contract + review | `tests/test_knowledge_integrity.py` (uniqueness/form); never-reused is a review rule |
+| PL-2 | A misuse-policy `classes` array holds exactly the three classes `legitimate`, `ambiguous`, `prohibited`. | Contract | `tests/test_knowledge_integrity.py` |
+| PL-3 | Every `notice` value (in `notices.json` and in `rewrite-policy` `notice_rules`) is a member of the Rewrite Report `notices` enum. | Contract | `tests/test_knowledge_integrity.py` |
+| PL-4 | Every `rewrite-policy` `notice_rules[].notice` has fixed text defined in `notices.json`. | Contract | `tests/test_knowledge_integrity.py` |
+| PL-5 | Every technique referenced by an allowed transformation exists in the techniques file; every `guarantee_ref` matches `^RG-[0-9]+$` and binds at most once. | Contract | `tests/test_knowledge_integrity.py` |
+| PL-6 | `rationale` fields are maintainer documentation only; no decision (gate, classification, transformation, notice attachment) reads them. | Verifier / engine | M2 (executable once the engine exists) |
+
 ## Composite validation
 
 | ID | Invariant | Enforced by | Test |

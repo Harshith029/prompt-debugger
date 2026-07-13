@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "policy_version": "2026.07-draft",
+  "notices": [
+    {
+      "id": "NOTICE-001",
+      "notice": "non_guarantee",
+      "text": "This rewrite is intended to improve clarity and communicate your legitimate intent more effectively. It does not guarantee a different response: model behavior depends on the provider's systems and policies, which this tool does not control or predict.",
+      "rationale": "The mandatory RW-2 notice. Wording deliberately avoids implying any promise about provider behavior, since the tool never simulates or predicts a provider's decision."
+    },
+    {
+      "id": "NOTICE-002",
+      "notice": "epistemic",
+      "text": "Estimated contributing factors are hypotheses, not facts. This analysis uses only information you can observe; it does not reflect any knowledge of a provider's internal systems, moderation logic, or thresholds.",
+      "rationale": "Marks the Estimated layer as labelled hypothesis so causal factors are never read as confirmed statements about provider internals."
+    },
+    {
+      "id": "NOTICE-003",
+      "notice": "gate_conditional",
+      "text": "This rewrite may still receive the same visible response under the provider's policies. It clarifies your intent; it does not make the request more acceptable to any provider.",
+      "rationale": "States the honest boundary of a conditional gate: clarity is orthogonal to whether a provider accepts the content."
+    },
+    {
+      "id": "NOTICE-004",
+      "notice": "gate_declined",
+      "text": "A rewrite was not produced for this request. The observable event, if any, is still explained honestly.",
+      "rationale": "Accompanies a declined gate so the user understands why no rewritten text appears, without the tool assisting circumvention."
+    }
+  ]
+}
