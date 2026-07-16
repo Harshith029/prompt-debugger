@@ -6,7 +6,7 @@
       "name": "prompt-debugger",
       "source": "./",
       "description": "Understand observable Claude behavior and improve prompt quality. Local-first.",
-      "version": "0.1.0-alpha"
+      "version": "0.2.0-alpha"
     }
   ]
 }

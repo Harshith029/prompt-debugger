@@ -14,7 +14,7 @@
 
 ## Notices
 
-`notices` lists which fixed texts accompany the rewrite. The texts themselves are versioned Knowledge Engine content (`core/knowledge/packs/common/notices.md`, M1), not free-form model output — so the non-guarantee wording is stable and testable. `non_guarantee` is **mandatory whenever `text != null`** (verifier-enforced).
+`notices` lists which fixed texts accompany the rewrite. The texts themselves are versioned Knowledge Engine content — **`core/knowledge/packs/common/notices.json` is the single source of truth for the wording**; its `notices.md` companion is derived from it and drift-checked by an integrity test — not free-form model output, so the non-guarantee wording is stable and testable. `non_guarantee` is **mandatory whenever `text != null`** (verifier-enforced).
 
 ## Invariants (verifier-enforced)
 

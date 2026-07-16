@@ -37,6 +37,7 @@ RW-1–RW-3 are checked against fixtures now (both compliant and violating) so t
 | EV-1 | `kind ∈ {unknown, none}` ⇒ `documented_match == null`. | Verifier | `tests/test_contract_invariants.py` |
 | EV-2 | `documented_match != null` ⇒ that id exists in the active event-taxonomy version. | Verifier | M2 (needs the loaded taxonomy) |
 | EV-3 | The `surface` value is a host-neutral category (`web`, `cli`, `desktop`, `api`, `other`, `unspecified`); provider-specific product names live only in provider knowledge packs. | Contract + knowledge | `tests/test_knowledge_integrity.py` |
+| EV-4 | One observation matches at most one taxonomy entry: kinds are unique, API-native entries (`api_*` kinds) list exactly the `api` surface, and rendered-message entries (`refusal_message`, `model_switch`) never list it (the observation-channel selection rule, documented in the provider pack's events companion). | Knowledge | `tests/test_knowledge_integrity.py` |
 
 ## Storage / persistence
 
@@ -62,11 +63,15 @@ RW-1–RW-3 are checked against fixtures now (both compliant and violating) so t
 | ID | Invariant | Enforced by | Test |
 |---|---|---|---|
 | KN-1 | No provider statement (technique, event-taxonomy entry) asserts provider behavior without at least one `clm-*` claim citation. | Contract | `tests/test_knowledge_integrity.py` |
-| KN-2 | An `active` technique or event-taxonomy entry must not cite a non-`active` claim (`stale`/`retired`/`recorded`). | Contract | `tests/test_knowledge_integrity.py` |
+| KN-2 | An `active` technique or event-taxonomy entry must not cite a non-`verified` claim (`recorded`/`stale`/`retired`). The claim lifecycle has no `active` state; `verified` is the citable state. | Contract | `tests/test_knowledge_integrity.py` |
 | KN-3 | Every event-taxonomy entry's `kind` is a member of the Observable Event contract's `kind` enum. | Contract | `tests/test_knowledge_integrity.py` |
 | KN-4 | Rubric dimensions reference existing technique ids; the pattern index references existing techniques and dimensions. | Contract | `tests/test_knowledge_integrity.py` |
 | KN-5 | The `common` pack is provider-neutral (no `provider`, no direct `clm-*` citations). | Contract | `tests/test_knowledge_integrity.py` |
 | KN-6 | Every pattern named in a pattern index `file` field exists on disk (no dangling references). | Contract | `tests/test_knowledge_integrity.py` |
+| KN-7 | Every event-taxonomy entry cites only `verified` claims (regardless of the entry's own status); claim statuses stay within the schema lifecycle (`recorded`/`verified`/`stale`/`retired`); every claim carries an https source, ISO retrieval and verification dates, and `last_verified >= retrieved`. | Contract | `tests/test_knowledge_integrity.py` |
+| KN-8 | No orphaned verified claims: every `verified` claim is cited by at least one structured knowledge artifact (technique or event-taxonomy entry). | Contract | `tests/test_knowledge_integrity.py` |
+| KN-9 | Pattern-library completeness and example integrity: every rubric dimension is covered by at least one pattern; index entries and on-disk bodies are bijective (no dangling references, no orphaned bodies); ids and files are unique; every body carries the full authored structure (sections + before/after example) and agrees with its index entry (id, title, dimensions, techniques); and every After demonstrates only rewrite-policy-permitted transformations — unknowable information appears as angle-bracket slots, and an After's numeric/file-like literals must already appear in its Before (the executable RG-7/RG-8 slice). | Knowledge | `tests/test_knowledge_integrity.py` |
+| KN-10 | Knowledge snapshot labels agree: the manifest's `knowledge_version` covers the whole corpus snapshot, and `pack_version` (both packs), `rubric_version`, `taxonomy_version`, and the three `policy_version` fields all name that same snapshot; prose companions state the same label in their headers. | Knowledge | `tests/test_knowledge_integrity.py` |
 
 ## Policy files (common pack)
 
@@ -80,6 +85,8 @@ The `misuse-policy`, `rewrite-policy`, and `notices` files are declarative data 
 | PL-4 | Every `rewrite-policy` `notice_rules[].notice` has fixed text defined in `notices.json`. | Contract | `tests/test_knowledge_integrity.py` |
 | PL-5 | Every technique referenced by an allowed transformation exists in the techniques file; every `guarantee_ref` matches `^RG-[0-9]+$` and binds at most once. | Contract | `tests/test_knowledge_integrity.py` |
 | PL-6 | `rationale` fields are maintainer documentation only; no decision (gate, classification, transformation, notice attachment) reads them. | Verifier / engine | M2 (executable once the engine exists) |
+| PL-7 | Fixed user-facing wording is canonical in JSON: `notices.json` for notice texts (covering the complete Rewrite Report `notices` enum with exactly one text per notice) and `misuse-policy.json` for decline templates. The derived `.md` companions quote each fixed text verbatim, and each companion's header states the same `policy_version` as its JSON. | Contract | `tests/test_knowledge_integrity.py` |
+| PL-8 | The three policy files carry one shared `policy_version`, equal to the `common` pack's snapshot label; the rewrite policy binds exactly the documented RG-1..RG-8 set; each `.md` companion carries every registry id of its JSON; policy files name no provider or product. | Contract | `tests/test_knowledge_integrity.py` |
 
 ## Composite validation
 

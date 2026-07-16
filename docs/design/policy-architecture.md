@@ -2,12 +2,13 @@
 
 | | |
 |---|---|
-| **Status** | Design for review. No policy files, rewrite logic, or analyzer behavior are implemented by this document. |
+| **Status** | Approved and implemented as data (M1 FR-3). The schemas and policy files exist; the engine that evaluates them is M2–M4. |
 | **Predecessor** | [M0 architecture](../ARCHITECTURE.md) (frozen); [Contract invariants](../CONTRACT-INVARIANTS.md) |
+| **Successor** | [Policy schemas](policy-schemas.md) — the authoritative field-by-field specification the implementation follows |
 | **Governs** | All future analyzer and rewrite behavior (M2–M4) |
-| **Milestone** | Policy Design (precedes [M1](../../specs/M1.md) FR-3 authoring) |
+| **Milestone** | Policy Design (preceded [M1](../../specs/M1.md) FR-3 authoring) |
 
-This document specifies the **policy system** that decides, for any prompt, (a) whether a rewrite is permitted, (b) what a rewrite may and may not do, (c) what the analyzer may and may not conclude, and (d) how every such decision is explained and made traceable. It is a design, not an implementation: it defines layers, precedence, guarantees, a classification model, a reporting philosophy, a schema specification, an extensibility model, and a testing strategy. FR-3 will author the concrete policy files against this design; M2–M4 will implement the engine that evaluates them.
+This document specifies the **policy system** that decides, for any prompt, (a) whether a rewrite is permitted, (b) what a rewrite may and may not do, (c) what the analyzer may and may not conclude, and (d) how every such decision is explained and made traceable. It defines layers, precedence, guarantees, a classification model, a reporting philosophy, an extensibility model, and a testing strategy. FR-3 authored the concrete policy files against this design (as refined by [policy-schemas.md](policy-schemas.md)); M2–M4 implement the engine that evaluates them.
 
 The design is deliberately continuous with what already exists. It formalizes and extends the honesty architecture, the [Rewrite Report contract](../../core/contracts/rewrite-report/CONTRACT.md) (`gate` ∈ `passed`/`conditional`/`declined`; invariants RW-1..RW-3), the misuse gate and transformation rules sketched in [ARCHITECTURE §6.6](../ARCHITECTURE.md), the provenance rules (KN-1..KN-2), and the data-driven Knowledge Engine ([ADR-0007](../adr/0007-knowledge-engine.md)). It introduces no new architectural shape; it names and orders what the frozen contracts already imply.
 
@@ -62,7 +63,7 @@ Before any prompt is analyzed, the policy corpus is validated as a whole. The fo
 
 - A L2 provider rule that weakens or negates a L0 global invariant or an L1 neutral rule.
 - A rule set that is internally contradictory (e.g., a transformation listed as both *required* and *prohibited*).
-- A provider statement without a claim citation (KN-1), or an `active` rule citing a non-`active` claim (KN-2).
+- A provider statement without a claim citation (KN-1), or an `active` rule citing a non-`verified` claim (KN-2).
 - A reference to a policy element that does not exist (a notice id, a technique id, a rubric dimension).
 
 A corpus that fails validation does not load; the engine fails closed (no analysis, no rewrite) rather than operating on an inconsistent policy. This makes the loaded corpus **provably consistent** before any decision is made — the strongest possible form of conflict resolution, because the conflict is designed out.
@@ -142,6 +143,8 @@ The analyzer distinguishes the classes by a fixed procedure, not by pattern-matc
 
 The outcome and the triggering step are recorded in the Rewrite Report (`gate`, `gate_reason`), so the classification is auditable and testable.
 
+**How this is represented as data.** The conditional dispatch above ("if yes → Prohibited") describes what the *analyzer code* does — it is this document's narrative of the decision procedure, not the shape of the policy file. Under the purely-declarative mandate, the implemented `misuse-policy.json` encodes the procedure as an **ordered checklist of prose steps** (registry ids `MISUSE-010`–`MISUSE-014`) with no branching fields; the analyzer walks the steps in order and owns all dispatch. See [policy-schemas.md](policy-schemas.md) for why a decision-tree-as-data was rejected.
+
 ### 4.3 Separation of concerns (critical)
 
 - **Neutral vs provider.** Steps 1–5 are neutral and live in the `common` pack. *What topics a specific provider's classifiers are sensitive to* is provider knowledge (dated claims in a provider pack) and feeds only the **Estimated** layer of the report — "factors that may have contributed to what you observed" — never the gate decision. The gate does not encode "cyber" or "bio"; it encodes "is this an attempt to defeat a safeguard."
@@ -188,44 +191,21 @@ Two report layers, one confidence rule:
 
 ---
 
-## 6. Policy schema (specification, not implementation)
+## 6. Policy schema (implemented — see policy-schemas.md)
 
-Policy is **validated data with prose companions**, exactly like the rubric (`rubric.json` + `rubric.md`). This is a deliberate choice: the parts of policy that must be machine-checked (the transformation lists, the notice texts keyed to the Rewrite Report `notices` enum, the misuse procedure steps) are structured JSON so they can be validated, diffed, and tested; the human exposition is a Markdown companion. This keeps policy inside the existing pack conventions ([knowledge contract](../../core/knowledge/README.md)) and under the schema subset (recursion-free, `additionalProperties: false`, versioned, one graceful-degradation member on any extensible enum).
+Policy is **validated data with prose companions**, exactly like the rubric (`rubric.json` + `rubric.md`): the parts of policy that must be machine-checked are structured JSON so they can be validated, diffed, and tested; the human exposition is a Markdown companion, inside the existing pack conventions and the recursion-free schema subset.
 
-Three `common`-pack policy files are specified below **by shape**. This document does not create them, and it does not create their schemas.
+This was resolved as **Option A** (schemas as validated data) under an approved frozen-baseline exception, refined by four review requirements — stable permanent registry ids, independent `schema_version`/`policy_version` axes, documented per-schema compatibility rules, and maintainer-facing `rationale` on every entry — and implemented in FR-3. The authoritative field-by-field specification is **[policy-schemas.md](policy-schemas.md)**; the earlier per-field sketches this section once carried (including a `procedure` shape with branching `on_yes`/`on_no` fields) are superseded — the branching representation was **rejected** by the purely-declarative mandate and replaced with an ordered prose checklist (§4.2).
 
-### 6.1 `misuse-policy` file (specification)
+What exists in the repository:
 
-| Field | Type | Constraint | Purpose |
-|---|---|---|---|
-| `file_version` | integer const | `1` | format version |
-| `policy_version` | string | `YYYY.MM[-tag]` | content version |
-| `procedure` | array | ordered; each item `{ step_id, test, on_yes, on_no }` | the neutral steps of §4.2, in evaluation order |
-| `classes` | array | members `legitimate` \| `ambiguous` \| `prohibited` | closed set of outcomes |
-| `elicitation` | object | `{ when, prompt_guidance }` | the ask-don't-guess rule for `ambiguous` |
-| `refusal_templates` | array | `{ id, text }` | fixed decline wording, referenced by the gate |
-| `status` | enum | `draft` \| `active` \| `deprecated` | promotion state |
-
-### 6.2 `rewrite-policy` file (specification)
-
-| Field | Type | Constraint | Purpose |
-|---|---|---|---|
-| `file_version` | integer const | `1` | format version |
-| `policy_version` | string | `YYYY.MM[-tag]` | content version |
-| `allowed_transformations` | array | `{ id, description, techniques[] }` | what a rewrite may do; each traces to technique ids |
-| `prohibited_transformations` | array | `{ id, description }` | the laundering checklist (RG-6) |
-| `guarantees` | array | member ids from the RG-* set | the guarantees this policy binds |
-| `notices_required` | array | subset of the `notices` enum | which notices attach and when |
-| `status` | enum | `draft` \| `active` \| `deprecated` | promotion state |
-
-### 6.3 `notices` file (specification)
-
-| Field | Type | Constraint | Purpose |
-|---|---|---|---|
-| `file_version` | integer const | `1` | format version |
-| `notices` | array | `{ id, text }`; `id` ∈ the Rewrite Report `notices` enum (`non_guarantee`, `epistemic`, `gate_declined`, `gate_conditional`) | the fixed, versioned notice texts |
-
-> **Open decision for review (frozen-baseline exception).** Making policy *validated data* means three new schema files (`misuse-policy.schema.json`, `rewrite-policy.schema.json`, `notices.schema.json`) under `core/contracts/knowledge/`, plus manifest wiring. M0 froze the contracts and the knowledge file-format set, and [M1's non-goals](../../specs/M1.md) list "no new knowledge-pack types." Adding these schemas is therefore a **contract addition that requires explicit approval** before FR-3. Two options: **(A)** approve the three additive schemas now (recommended — it keeps policy testable as data, consistent with the rubric); or **(B)** author policy as Markdown-only in `common` for M1 and add schemas in a later, explicitly-scoped contract revision (weaker: the transformation lists and notice texts would not be machine-validated). This document recommends (A) and does not proceed either way without a decision.
+| Artifact | Location |
+|---|---|
+| Schemas | [`core/contracts/knowledge/`](../../core/contracts/knowledge/CONTRACT.md): [`misuse-policy.schema.json`](../../core/contracts/knowledge/misuse-policy.schema.json), [`rewrite-policy.schema.json`](../../core/contracts/knowledge/rewrite-policy.schema.json), [`notices.schema.json`](../../core/contracts/knowledge/notices.schema.json) |
+| Policy data | `core/knowledge/packs/common/`: [`misuse-policy.json`](../../core/knowledge/packs/common/misuse-policy.json), [`rewrite-policy.json`](../../core/knowledge/packs/common/rewrite-policy.json), [`notices.json`](../../core/knowledge/packs/common/notices.json) — canonical for all fixed wording (notice texts, decline templates) |
+| Prose companions | [`misuse-policy.md`](../../core/knowledge/packs/common/misuse-policy.md), [`rewrite-policy.md`](../../core/knowledge/packs/common/rewrite-policy.md), [`notices.md`](../../core/knowledge/packs/common/notices.md) — derived exposition; fixed wording is quoted verbatim and drift-checked |
+| Invariants | PL-1..PL-8 in [CONTRACT-INVARIANTS.md](../CONTRACT-INVARIANTS.md), guarded by `tests/test_knowledge_integrity.py` |
+| Governance | [docs/process/policy-review.md](../process/policy-review.md) — how the policy data evolves |
 
 ---
 
@@ -257,8 +237,8 @@ All six extend the existing test architecture and pass under the current gate; n
 
 ---
 
-## Relationship to FR-3 and definition of done for this design
+## Relationship to FR-3 (completed) and what remains
 
-FR-3 (policy authoring) is *implementing this design as data*: writing the `common`-pack `misuse-policy`, `rewrite-policy`, and `notices` files so that their `procedure`, transformation lists, guarantees, and notice texts match §§3–6, and adding the invariant/contradiction/conflict tests of §8. Nothing in FR-3 may introduce a rule that this design forbids, and nothing may weaken a global invariant.
+FR-3 implemented this design as data: the `common`-pack `misuse-policy`, `rewrite-policy`, and `notices` files exist, their procedure, transformation lists, guarantees, and notice texts match §§3–5, and the integrity checks that are meaningful without an engine (id discipline, reference resolution, provenance, neutrality, JSON/Markdown consistency) run in `tests/test_knowledge_integrity.py`. Nothing in the authored policy introduces a rule this design forbids, and nothing weakens a global invariant.
 
-This design is done when it is reviewed and either accepted or amended, and when the §6 open decision (validated-data schemas vs Markdown-only) is resolved. No policy file, rewrite rule, or analyzer behavior is created until then.
+What remains for M2–M4: the engine that evaluates this data (load-time corpus validation §2.1, phase-ordered runtime evaluation §2.2, the verifier for the hard guarantees §3), the decision-snapshot and red-team suites of §8 that need a running gate, and report/persistence integration. Policy content changes from here follow [docs/process/policy-review.md](../process/policy-review.md).

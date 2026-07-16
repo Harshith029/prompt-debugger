@@ -15,9 +15,9 @@
     "report_version": 1,
     "created_at": "2026-07-07T12:00:01Z",
     "knowledge": {
-      "knowledge_version": "2026.07-draft",
+      "knowledge_version": "2026.07-m1",
       "provider": "anthropic",
-      "rubric_version": "2026.07-draft"
+      "rubric_version": "2026.07-m1"
     },
     "event": null,
     "ir": {

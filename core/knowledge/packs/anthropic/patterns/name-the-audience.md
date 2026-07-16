@@ -11,7 +11,7 @@ The prompt states a task but not who the output is for, what it is part of, or w
 
 ## Transformation
 
-Add the audience and the purpose the user actually holds. This makes existing intent explicit — it introduces no new requirements and no facts the user did not supply (rewrite-contract compliant).
+Make the audience and purpose the user actually holds explicit. The angle-bracket slots below mark information the user has but the prompt lacks: the rewrite fills them only with facts the user actually supplied, and asks when it does not have them — it invents nothing (rewrite-policy compliant).
 
 ## Example
 
@@ -24,11 +24,11 @@ Explain how our caching layer works.
 **After**
 
 ```
-Explain how our caching layer works, for a new backend engineer joining the team
-next week. The goal is to get them productive making changes to it, so focus on the
-read/write paths and the invalidation rules rather than the history of why it was built.
+Explain how our caching layer works, for <who will read this — their role and
+familiarity with the system>, so that <what the reader should be able to do with
+the explanation>.
 ```
 
 ## Why it helps
 
-Stating the reader ("a new backend engineer") and the purpose ("get them productive making changes") lets the model select depth, tone, and emphasis instead of inferring them. Nothing about the request's meaning changed; the intent is simply no longer hidden.
+Stating the reader and the purpose lets the model select depth, tone, and emphasis instead of inferring them. The slots are filled with the audience and goal the user really has — nothing about the request's meaning changes; the intent is simply no longer hidden.

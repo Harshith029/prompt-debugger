@@ -23,7 +23,7 @@ Contracts are versioned integers embedded in every instance (see [contracts READ
 
 ## Knowledge compatibility
 
-Knowledge packs are versioned independently of code and of contracts. Reports pin the knowledge, provider, and rubric versions that produced them, so any report is reproducible against the exact knowledge state. Claim/taxonomy/rubric version bumps are logged in [CHANGELOG.md](../CHANGELOG.md).
+Knowledge packs are versioned independently of code and of contracts. Reports pin the knowledge, provider, rubric, and (when a policy corpus was loaded) policy versions that produced them, so any report is reproducible against the exact knowledge and policy state. Claim/taxonomy/rubric/policy version bumps are logged in [CHANGELOG.md](../CHANGELOG.md).
 
 ## SemVer for the project
 

@@ -3,21 +3,21 @@
   "claims": [
     {
       "id": "clm-refusal-stop-reason",
-      "claim": "A safeguard decline on the Claude API returns a successful HTTP 200 response with stop_reason 'refusal' and a stop_details object of type 'refusal'; stop_details carries a category (documented values: cyber, bio, frontier_llm, reasoning_extraction) and a human-readable explanation, and both category and explanation are null when the decline maps to no named category. stop_details is null for every stop_reason other than 'refusal'.",
+      "claim": "A safeguard decline on the Claude API returns a successful HTTP 200 response with stop_reason 'refusal' and a stop_details object of type 'refusal'; stop_details carries a category (documented values: cyber, bio, frontier_llm, reasoning_extraction) and a human-readable explanation (documented as not stable — display, don't parse), and both category and explanation are null when the decline maps to no named category. stop_details is null for every stop_reason other than 'refusal'. On Message Batches results, stop_details may be null even on a refusal, so refusals are detected by checking stop_reason directly.",
       "url": "https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback",
       "retrieved": "2026-07-07",
       "status": "verified",
-      "last_verified": "2026-07-12",
-      "notes": "Verified 2026-07-12 against the live page, incl. the category table (cyber, bio, frontier_llm, reasoning_extraction) and the 'both null when unmapped' / 'stop_details null for other stop reasons' rules."
+      "last_verified": "2026-07-14",
+      "notes": "Re-verified 2026-07-14 against the live page (updated since the 2026-07-12 verification), incl. the category table, the 'both null when unmapped' / 'stop_details null for other stop reasons' rules, the explanation-not-stable note, and the batch-results nuance added in FR-4.1."
     },
     {
       "id": "clm-fallback-block",
-      "claim": "When fallbacks are configured, the response's top-level 'model' field names the model that produced the returned message, and a content block of type 'fallback' with from/to model sub-objects ({'type':'fallback','from':{'model':...},'to':{'model':...}}) marks each point where one model's output gives way to the next.",
+      "claim": "When fallbacks are configured, the response's top-level 'model' field names the model that produced the returned message, and a content block of type 'fallback' with from/to model sub-objects ({'type':'fallback','from':{'model':...},'to':{'model':...}}) marks each point where one model's output gives way to the next. The usage.iterations array records every attempt: a model that declined appears as a 'message' entry and the model that served the turn as a 'fallback_message' entry. After a conversation has fallen back, documented sticky routing (retained approximately one hour, organization-scoped, best-effort) may send later requests directly to the fallback model; such a turn carries no fallback content block and is identified by the fallback_message entry in usage.iterations and the response's 'model' field.",
       "url": "https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback",
       "retrieved": "2026-07-07",
       "status": "verified",
-      "last_verified": "2026-07-12",
-      "notes": "Verified 2026-07-12; the fallback block shape and top-level 'model' semantics are quoted verbatim on the live page (server-side fallback section)."
+      "last_verified": "2026-07-14",
+      "notes": "Re-verified 2026-07-14 against the live page (updated since 2026-07-12). Extended in FR-4.1 with the documented usage.iterations record and sticky routing — which bounds what the absence of a fallback block can prove: a fallback-served turn may carry no block."
     },
     {
       "id": "clm-fable-classifier-scope",
@@ -30,12 +30,39 @@
     },
     {
       "id": "clm-consumer-surface-fallback",
-      "claim": "Anthropic's public refusals-and-fallback documentation specifies only the API-level and SDK fallback mechanisms (the server-side 'fallbacks' parameter, the SDK refusal-fallback middleware, and manual retry). It does not document how consumer product surfaces (for example the web app or the Claude Code CLI) implement automatic fallback after a safeguard decline, nor any user-facing switch notice they display. Consumer-surface fallback behavior is therefore not publicly documented on this page.",
+      "claim": "Anthropic's platform page 'Refusals and fallback' documents only developer-surface mechanisms — the server-side 'fallbacks' parameter, the SDK refusal-fallback middleware, and manual retry — and contains no description of any consumer product surface's automatic fallback behavior or user-facing switch notice. Consumer-surface behavior is documented elsewhere, per product: the Claude Code documentation documents the CLI's automatic model fallback (clm-claude-code-fallback), and the Claude Help Center documents the consumer apps' automatic switching and notice (clm-webapp-switch-notice). A surface not covered by one of those documents remains undocumented in the sources this registry tracks.",
       "url": "https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback",
       "retrieved": "2026-07-07",
       "status": "verified",
-      "last_verified": "2026-07-12",
-      "notes": "Resolved 2026-07-12 (was the open M1 question). The live page covers only the API/SDK mechanism; it contains no description of consumer-surface fallback behavior or notices. This claim now backs the 'cannot_conclude' boundary of the model-switch taxonomy entry: a user-observed switch is treated as the user's own report, and only the documented API mechanism is cited for what CAN be concluded."
+      "last_verified": "2026-07-14",
+      "notes": "REVISED in FR-4.1 (2026-07-14). The original wording let a page-scoped negative read as a global one ('consumer-surface fallback is not publicly documented'), which the FR-4.1 survey falsified: product-specific official documentation does cover it (see clm-claude-code-fallback, clm-webapp-switch-notice, clm-cookbook-fallback-billing). Re-verified 2026-07-14 against the substantially updated live page (now covers usage.iterations, sticky routing, batches; still nothing on consumer surfaces). The claim is now scoped to exactly what the evidence supports: this page's coverage, with explicit pointers to where product behavior IS documented."
+    },
+    {
+      "id": "clm-claude-code-fallback",
+      "claim": "The Claude Code documentation ('Model configuration', section 'Automatic model fallback') documents automatic content-based model fallback for the Claude Code product: when a safety classifier flags a request on Claude Fable 5, Claude Code re-runs that request on the provider's default Opus model and shows a notice in the transcript; the session then continues on that Opus model, and the user returns with /model fable. On the Anthropic API, LLM gateway deployments, and Claude Platform on AWS the fallback target is Opus 4.8. Users can choose per-request behavior instead ('ask before switching') via /config; when the fallback target is excluded by the availableModels allowlist, no fallback occurs and the flagged request ends with a refusal. On Amazon Bedrock, Google Cloud's Agent Platform, and Microsoft Foundry, automatic fallback operates only when Claude Code can identify both models (the model ID contains claude-fable-5 or matches ANTHROPIC_DEFAULT_FABLE_MODEL, and the target resolves via ANTHROPIC_DEFAULT_OPUS_MODEL or a provider Opus 4.8 entry); otherwise the flagged request ends with a refusal and the user may switch models manually and retry. Fallback can trigger on a session's first request from workspace context alone. The page distinguishes this content-based fallback from availability-based fallback model chains used when a model is overloaded or unavailable.",
+      "url": "https://code.claude.com/docs/en/model-config",
+      "retrieved": "2026-07-14",
+      "status": "verified",
+      "last_verified": "2026-07-14",
+      "notes": "Verified 2026-07-14 against the live page. This documents the Claude Code product surface and is the claim that corrects the earlier global reading of clm-consumer-surface-fallback: at least one consumer surface's fallback behavior IS officially documented, including a visible transcript notice."
+    },
+    {
+      "id": "clm-webapp-switch-notice",
+      "claim": "The Claude Help Center article 'Why Claude switched models in your conversation with Fable 5' documents automatic model switching in the Claude consumer apps (Claude on the web, mobile, and desktop; the article also lists Claude Cowork, Claude Code, Claude Design, Claude for Microsoft 365, Claude for Teams, Claude in Slack, and Claude Tag as supporting it): when Fable 5 safeguards block a request, the conversation switches to Claude Opus 4.8, the user sees a notice explaining that the model switched, and the response is labeled with the model that answered. Automatic switching is enabled by default, and the user can switch back to Claude Fable 5 anytime from the model picker. The exact wording and appearance of the notice are not documented, and the article states that API behavior is different and out of its scope.",
+      "url": "https://support.claude.com/en/articles/15363606-why-claude-switched-models-in-your-conversation-with-fable-5",
+      "retrieved": "2026-07-14",
+      "status": "verified",
+      "last_verified": "2026-07-14",
+      "notes": "Verified 2026-07-14 against the live article. Documents the consumer-app switch notice; together with clm-claude-code-fallback it replaces the earlier working assumption that no consumer-surface behavior was officially documented."
+    },
+    {
+      "id": "clm-cookbook-fallback-billing",
+      "claim": "Anthropic's official Cookbook guide 'Classifier fallback and billing for Claude Fable 5' documents the developer-surface fallback mechanisms end to end: server-side fallback (the 'fallbacks' parameter with the server-side-fallback-2026-06-01 beta header) is supported on the Claude API and Claude Platform on AWS but not on Amazon Bedrock, Vertex AI, Microsoft Foundry, or the Message Batches API; the SDK refusal-fallback middleware (Python, TypeScript, Go, Java, C#) covers all platforms and sends the fallback-credit-2026-06-01 beta header automatically; and a manual retry can redeem a fallback_credit_token carried in stop_details of a blocked request (present only when the blocked request had a billable cached prefix) within five minutes, with system/messages/tools identical, so fallback input tokens are billed at cache-read pricing. The guide addresses the developer API/SDK surface, not consumer product behavior.",
+      "url": "https://platform.claude.com/cookbook/fable-5-fallback-billing-guide",
+      "retrieved": "2026-07-14",
+      "status": "verified",
+      "last_verified": "2026-07-14",
+      "notes": "Verified 2026-07-14 against the live guide, as part of the FR-4.1 consumer-surface survey ('all currently relevant official documentation, including the official Cookbook'). Confirms the developer-surface scope boundary and the per-platform availability differences of server-side fallback."
     },
     {
       "id": "clm-api-errors",
@@ -44,7 +71,16 @@
       "retrieved": "2026-07-07",
       "status": "verified",
       "last_verified": "2026-07-12",
-      "notes": "Verified 2026-07-12 against the live errors page; the code list here now matches it exactly (previously omitted 402/409/504). The earlier claim also asserted stop reasons 'max_tokens' and 'model_context_window_exceeded' — those are NOT on the errors page (they belong to the stop-reasons page). That sub-clause was removed to keep this claim tied to its source; a dedicated stop-reasons claim is deferred until handling-stop-reasons can be fetched (a WebFetch session limit blocked it on 2026-07-12)."
+      "notes": "Verified 2026-07-12 against the live errors page; the code list here now matches it exactly (previously omitted 402/409/504). The earlier claim also asserted stop reasons 'max_tokens' and 'model_context_window_exceeded' — those are NOT on the errors page (they belong to the stop-reasons page), so that sub-clause was removed to keep this claim tied to its source. The deferral this created was resolved on 2026-07-14 by the dedicated clm-stop-reasons claim."
+    },
+    {
+      "id": "clm-stop-reasons",
+      "claim": "Every successful (HTTP 200) Messages API response carries a top-level 'stop_reason' field that explains why generation ended — distinct from HTTP errors, which indicate request-processing failures. Documented values: end_turn (the response finished naturally), max_tokens (the response reached the request's max_tokens limit; raise the limit or continue the response), stop_sequence (a configured stop sequence fired; the 'stop_sequence' field names it), tool_use (the model is calling a tool), pause_turn (a server-tool loop reached its iteration limit; send the assistant content back to continue), refusal (the model declined to respond; read stop_details and optionally retry on a fallback model), and model_context_window_exceeded (the response filled the model's context window; treat the response as truncated).",
+      "url": "https://platform.claude.com/docs/en/api/handling-stop-reasons",
+      "retrieved": "2026-07-14",
+      "status": "verified",
+      "last_verified": "2026-07-14",
+      "notes": "Verified 2026-07-14 against the live page; all seven documented values captured with the page's stated meanings and follow-ups. Resolves the deferral recorded in clm-api-errors on 2026-07-12 (WebFetch session limit). Backs the truncation-vs-error boundary in evt-user-visible-error and the HTTP-200 framing of the refusal entries. Truncation stop conditions have no taxonomy kind in the frozen v1 event contract — see ADR-0009."
     },
     {
       "id": "clm-pe-best-practices",

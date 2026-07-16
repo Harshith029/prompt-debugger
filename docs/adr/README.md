@@ -12,5 +12,6 @@ Each ADR captures one significant decision: its context, the decision, alternati
 | [0006](0006-stdlib-only-runtime.md) | Stdlib-only runtime, no runtime network I/O | Accepted |
 | [0007](0007-knowledge-engine.md) | Knowledge Engine of versioned data packs | Accepted |
 | [0008](0008-vendored-core-in-plugin.md) | Vendor core/ into the Claude Code plugin | Accepted |
+| [0009](0009-truncation-observables-deferred.md) | Truncation observables are claim-backed but have no taxonomy kind in M1 | Accepted |
 
 Template: [`_template.md`](_template.md).

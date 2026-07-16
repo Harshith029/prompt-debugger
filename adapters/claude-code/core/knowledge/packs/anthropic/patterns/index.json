@@ -2,6 +2,14 @@
   "file_version": 1,
   "patterns": [
     {
+      "id": "pat-resolve-ambiguity",
+      "title": "Resolve ambiguous referents and terms",
+      "file": "resolve-ambiguity.md",
+      "techniques": ["T1"],
+      "dimensions": ["R1"],
+      "status": "draft"
+    },
+    {
       "id": "pat-name-the-audience",
       "title": "Name the audience and purpose",
       "file": "name-the-audience.md",
@@ -10,11 +18,59 @@
       "status": "draft"
     },
     {
+      "id": "pat-reconcile-contradictions",
+      "title": "Reconcile contradictory instructions",
+      "file": "reconcile-contradictions.md",
+      "techniques": ["T1"],
+      "dimensions": ["R3"],
+      "status": "draft"
+    },
+    {
+      "id": "pat-surface-real-scope",
+      "title": "Surface the real scope",
+      "file": "surface-real-scope.md",
+      "techniques": ["T8", "T9"],
+      "dimensions": ["R4"],
+      "status": "draft"
+    },
+    {
       "id": "pat-split-unrelated-tasks",
       "title": "Split unrelated tasks into separate prompts",
       "file": "split-unrelated-tasks.md",
       "techniques": ["T8"],
       "dimensions": ["R5"],
+      "status": "draft"
+    },
+    {
+      "id": "pat-separate-instructions-from-data",
+      "title": "Separate instructions from data",
+      "file": "separate-instructions-from-data.md",
+      "techniques": ["T4", "T6"],
+      "dimensions": ["R6"],
+      "status": "draft"
+    },
+    {
+      "id": "pat-state-goals-not-steps",
+      "title": "State goals and constraints, not micromanaged steps",
+      "file": "state-goals-not-steps.md",
+      "techniques": ["T10"],
+      "dimensions": ["R7"],
+      "status": "draft"
+    },
+    {
+      "id": "pat-state-definition-of-done",
+      "title": "State the definition of done",
+      "file": "state-definition-of-done.md",
+      "techniques": ["T9"],
+      "dimensions": ["R8"],
+      "status": "draft"
+    },
+    {
+      "id": "pat-state-constraints",
+      "title": "State the constraints you hold",
+      "file": "state-constraints.md",
+      "techniques": ["T9", "T7"],
+      "dimensions": ["R9"],
       "status": "draft"
     },
     {

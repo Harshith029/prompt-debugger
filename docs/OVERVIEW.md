@@ -11,7 +11,7 @@ Start here to navigate the project's documentation.
 ## For contributors
 
 - [Contributor guide](../CONTRIBUTING.md) — setup, the local gate, the review workflow.
-- [Architecture](ARCHITECTURE.md) — the full design (v0.2, post-review).
+- [Architecture](ARCHITECTURE.md) — the full design; its header carries the authoritative document version and last-updated date.
 - [Architecture Decision Records](adr/README.md) — why the key decisions were made.
 - [Data flow](DATAFLOW.md) — how a request moves through the system, with trust boundaries.
 - [Glossary](GLOSSARY.md) — the project's vocabulary (used consistently by contract).
@@ -23,7 +23,7 @@ Start here to navigate the project's documentation.
 
 ## Process and policies
 
-- [M0 milestone record](releases/M0.md) — the permanent engineering record for the foundation, and the [M1 specification](../specs/M1.md) for what comes next.
+- Milestone records: [M0](releases/M0.md) (engineering foundation) and [M1](releases/M1.md) (knowledge verification & policy authoring) — the permanent engineering records; the [M1 specification](../specs/M1.md) defines what M1 delivered.
 - [Compatibility policy](COMPATIBILITY.md) — versioning and support commitments.
 - [Threat model](THREAT-MODEL.md) and the security process in [SECURITY.md](../SECURITY.md).
 - [Roadmap](ROADMAP.md) — milestones and what's next.

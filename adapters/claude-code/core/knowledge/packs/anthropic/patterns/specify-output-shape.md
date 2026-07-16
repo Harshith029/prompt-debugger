@@ -11,7 +11,7 @@ The output's shape matters to the user but the prompt does not state it, so the 
 
 ## Transformation
 
-State what the output should be (format, structure, sections), phrased as an instruction to follow rather than a thing to avoid. Optionally show one brief example. This adds a constraint the user actually holds; it does not change the substance of the request (rewrite-contract compliant).
+State what the output should be (format, structure, sections), phrased as an instruction to follow rather than a thing to avoid. Optionally show one brief example built from placeholders — the rewrite policy permits placeholder examples only, never invented domain content presented as fact (rewrite-policy compliant).
 
 ## Example
 
@@ -24,14 +24,13 @@ Give me the differences between the two API versions.
 **After**
 
 ```
-Give me the differences between the two API versions as a table with three columns:
-Feature, v1 behavior, v2 behavior. One row per feature that changed. Example row:
+Give me the differences between the two API versions as a table: one row per
+difference, with columns for the feature, its behavior in the first version, and
+its behavior in the second. Example row:
 
-| Feature      | v1 behavior            | v2 behavior              |
-|--------------|------------------------|--------------------------|
-| Pagination   | offset-based          | cursor-based             |
+| <feature> | <behavior in the first version> | <behavior in the second version> |
 ```
 
 ## Why it helps
 
-A positive format instruction ("a table with three columns…") plus one example communicates the target far more reliably than leaving the shape implicit or describing it in the negative. The request's meaning is unchanged; only its expected form is now explicit.
+A positive format instruction plus one placeholder row communicates the target far more reliably than leaving the shape implicit or describing it in the negative. The request's meaning is unchanged; only its expected form is now explicit — and the example row asserts no facts about the user's APIs.

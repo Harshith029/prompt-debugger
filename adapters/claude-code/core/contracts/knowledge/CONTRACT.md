@@ -44,10 +44,10 @@ Techniques and rubric dimensions link into the same claim registry via `source_c
 
 ## Versioning
 
-- `manifest.json` carries `knowledge_version` (e.g. `2026.07-draft`) covering the whole corpus snapshot.
+- `manifest.json` carries `knowledge_version` (e.g. `2026.07-m1`) covering the whole corpus snapshot.
 - Each pack carries `pack_version`; each file carries a format version as an integer. Most files spell it `file_version`; the `common`-pack **policy** files (`misuse-policy`, `rewrite-policy`, `notices`) spell it `schema_version` and additionally carry `policy_version` (content version) — schema evolution and policy evolution are independent axes for these files. See [policy-schemas.md](../../../docs/design/policy-schemas.md).
-- Reports pin `knowledge.knowledge_version`, `provider`, and `rubric_version`, so any report is reproducible against the knowledge that produced it.
-- Claims have lifecycle `recorded → verified → stale → retired`; a quarterly re-verification checklist (issue template) drives transitions. `stale`/`retired` claims poison downstream entries: CI warns when an active taxonomy entry or technique cites a non-active claim.
+- Reports pin `knowledge.knowledge_version`, `provider`, `rubric_version`, and (when a policy corpus was loaded) `policy_version`, so any report is reproducible against the knowledge and policy that produced it.
+- Claims have lifecycle `recorded → verified → stale → retired`; a quarterly re-verification checklist (issue template) drives transitions. `verified` is the citable state: an `active` taxonomy entry or technique must not cite a non-`verified` claim (KN-2), and taxonomy entries cite only `verified` claims regardless of their own status (KN-7).
 
 ## Query model (implemented M2, contract now)
 

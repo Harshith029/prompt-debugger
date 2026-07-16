@@ -1,6 +1,11 @@
 # Development-only dependencies. The runtime is standard-library only (ADR-0006).
 # jsonschema is dev-only: differential testing + CI schema validation (approved decision).
 pytest>=8.2
-ruff>=0.5
+# ruff is pinned EXACTLY: the formatter's style evolves between versions (e.g. the
+# assert-message wrapping change), so a floating bound makes `ruff format --check` a
+# non-deterministic gate — two environments that both satisfy the range can disagree
+# on the same tree (FR-4.2 root-cause analysis, CHANGELOG). Bump deliberately: update
+# this pin and reformat in the same change.
+ruff==0.15.21
 mypy>=1.10
 jsonschema>=4.22

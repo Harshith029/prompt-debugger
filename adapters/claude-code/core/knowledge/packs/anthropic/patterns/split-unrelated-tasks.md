@@ -11,7 +11,7 @@ A single prompt bundles independent goals that would each be served better on th
 
 ## Transformation
 
-Separate the independent requests so each can be answered well. Splitting preserves every original request — nothing is dropped or reworded away (rewrite-contract compliant). Where the tasks are dependent rather than merely bundled, state the sequence instead of splitting.
+Separate the independent requests so each can be answered well. Splitting preserves every original request — nothing is dropped or reworded away (rewrite-policy compliant). Where the tasks are dependent rather than merely bundled, state the sequence instead of splitting.
 
 ## Example
 
@@ -24,8 +24,8 @@ Set up the database schema for the orders service, and also write a launch tweet
 **After**
 
 ```
-Prompt 1: Set up the database schema for the orders service.
-Prompt 2: Write a launch tweet announcing the orders service.
+First prompt: Set up the database schema for the orders service.
+Second prompt: Write a launch tweet for the orders service.
 ```
 
 ## Why it helps

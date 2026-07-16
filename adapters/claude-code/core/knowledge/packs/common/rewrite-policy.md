@@ -1,4 +1,4 @@
-# Rewrite Policy — prose companion (policy_version 2026.07-draft)
+# Rewrite Policy — prose companion (policy_version 2026.07-m1)
 
 Human/model-readable exposition of the rewrite rules defined in [`rewrite-policy.json`](rewrite-policy.json). Ids match one-to-one. The JSON is what machines validate; this file is what analysis-layer adapters read. Design basis: [policy architecture §3](../../../../docs/design/policy-architecture.md).
 
@@ -6,7 +6,7 @@ Human/model-readable exposition of the rewrite rules defined in [`rewrite-policy
 
 ## Allowed transformations
 
-Each cites the technique ids it applies (provenance to the Anthropic techniques file); `RW-009` is purely mechanical and cites none.
+Each cites the technique ids it applies (provenance to the active provider pack's techniques file); `RW-009` is purely mechanical and cites none.
 
 - **RW-001** state audience and purpose, using only supplied context (T2).
 - **RW-002** resolve ambiguous referents and undefined terms the user already identified (T1).

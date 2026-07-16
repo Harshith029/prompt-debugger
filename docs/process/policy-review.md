@@ -42,7 +42,7 @@ A reviewer of a policy PR verifies, explicitly and in this order:
 ## Evidence requirements
 
 - **Common-pack policy** is methodology, not provider fact. It requires *reasoned* justification (in rationales and the PR description) but must not cite provider claims — that is what keeps it neutral.
-- **Provider-pack knowledge** that informs policy outcomes (claims, techniques, event taxonomy) follows the provenance chain: every provider-behavior statement cites at least one `clm-*` claim (KN-1); `active` entries cite only `active` claims (KN-2); every claim carries a URL, retrieval date, and verification status against a live public source.
+- **Provider-pack knowledge** that informs policy outcomes (claims, techniques, event taxonomy) follows the provenance chain: every provider-behavior statement cites at least one `clm-*` claim (KN-1); `active` entries cite only `verified` claims (KN-2); every claim carries a URL, retrieval date, and verification status against a live public source.
 - **Negative results are evidence.** If a source does not document a behavior, record that as a verified-negative claim rather than leaving the boundary implicit — the honest "cannot conclude" boundary must itself be sourced.
 - **No fabricated evidence, ever.** If a source cannot be fetched or verified, the change waits or is narrowed to what the reachable sources support; the deferral is documented.
 

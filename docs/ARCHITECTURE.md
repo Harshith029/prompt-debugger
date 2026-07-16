@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| **Status** | Milestone M0 (engineering foundation) implemented. Analyzer and rewrite behavior are future work (M2–M4). |
-| **Document version** | 1.0 |
-| **Last updated** | 2026-07-07 |
+| **Status** | Milestone M0 (engineering foundation) complete, released as `v0.1.0-alpha`. Milestone M1 (knowledge verification & policy authoring) complete, released as `v0.2.0-alpha`: the claim registry is verified against live sources, the policy layer (misuse policy, rewrite policy, notices) is authored and frozen, the event-taxonomy prose is complete, the pattern library is complete, and the knowledge snapshot is versioned (`2026.07-m1`). Milestone M2 has not started; analyzer and rewrite behavior are future work (M2–M4). |
+| **Document version** | 1.1 |
+| **Last updated** | 2026-07-14 |
 
 This document describes the architecture of `prompt-debugger`: its layering, contracts, and the reasoning behind the significant design decisions. Decisions are also captured individually as [Architecture Decision Records](adr/README.md).
 
@@ -36,14 +36,14 @@ The primary user journey (confirmed by the maintainer): *a user's legitimate pro
 
 All factual claims about model/API behavior live in a **claim registry** ([`core/knowledge/packs/anthropic/claims.json`](../core/knowledge/packs/anthropic/claims.json)): claim ID, exact claim text, source URL, retrieval date, verification status, last-verified date. The registry is versioned; the event taxonomy and rubric carry version identifiers; every generated report records which versions it used. A quarterly re-verification checklist (issue template) keeps the corpus honest as Anthropic's documentation evolves. **The taxonomy is explicitly non-exhaustive**: events that match no documented pattern are classified `unknown` and handled gracefully (§6.5).
 
-Facts the product currently relies on (each is a registry entry retrieved 2026-07-07, currently `status: "recorded"`; the verification pass against live sources is Milestone M1):
+Facts the product currently relies on (each is a registry entry, `status: "verified"` against its live source — see the `last_verified` dates in the registry; verified in M1 FR-1 and extended during FR-4/FR-4.1):
 
 - A safeguard decline on the API returns **HTTP 200 with `stop_reason: "refusal"`**, optionally with `stop_details` (`category` values documented to include `"cyber"`, `"bio"`, `"reasoning_extraction"`, `"frontier_llm"`, or `null`; `explanation` not guaranteed). Classifier declines and ordinary model refusals surface through the same stop reason.
-- With fallbacks configured, a **`fallback` content block** (`{type: "fallback", from: {model}, to: {model}}`) marks a model switch, and the response `model` field names the serving model.
-- **User-visible errors** are enumerated publicly: 400/401/403/404/413/429/500/529 plus stop reasons `max_tokens` and `model_context_window_exceeded`.
-- Fable 5's classifiers target offensive cyber, bio/life-sciences, and reasoning extraction; **benign work may trigger false positives**; Anthropic documents fallback to Claude Opus 4.8 as the recovery path.
+- With fallbacks configured, a **`fallback` content block** (`{type: "fallback", from: {model}, to: {model}}`) marks a model switch, and the response `model` field names the serving model; `usage.iterations` records every attempt, and documented sticky routing can serve a fallback turn with no block.
+- **User-visible errors** are enumerated publicly with a type string per HTTP status (400, 401, 402, 403, 404, 409, 413, 429, 500, 504, 529). Truncation is **not** an error: it surfaces on a successful response as stop_reason `max_tokens` or `model_context_window_exceeded`.
+- Fable 5's classifiers target offensive cyber, bio/life-sciences, and reasoning extraction; **benign work may trigger false positives**; Anthropic documents fallback to Claude Opus 4.8 as the recovery path — on the API (`fallbacks`/SDK middleware), in Claude Code (automatic re-run with a transcript notice), and in the consumer apps (automatic switching with a visible notice).
 
-**Consumer/CLI surfaces (claude.ai, Claude Code):** a model-switch notice or refusal banner the user sees is treated as **observed evidence reported by the user** — a fact about what appeared on their screen. The *citation* attached to it references only the documented API mechanism class; whether a given surface implements fallback in a particular way is stated as **not publicly specified** unless a public source is verified (an explicit M1 task against the refusals-and-fallback page, recorded in the registry either way).
+**Consumer/CLI surfaces (claude.ai, Claude Code):** a model-switch notice or refusal banner the user sees is treated as **observed evidence reported by the user** — a fact about what appeared on their screen. The M1 verification resolved how these surfaces are cited (recorded in the registry): Claude Code's automatic model fallback — including its visible transcript notice — is officially documented (`clm-claude-code-fallback`), as is the consumer apps' automatic switching with a notice and model label (`clm-webapp-switch-notice`); the platform refusals-and-fallback page itself documents only the API/SDK mechanisms (`clm-consumer-surface-fallback`, a page-scoped verified negative). Where a surface has a tracked product document, its documented behavior may be cited; for any other surface the behavior remains the user's report, and one surface's documentation is never borrowed for another. Which taxonomy entry an observation matches is decided by the observation-channel rule (invariant EV-4).
 
 **Prompt-engineering technique inventory (T1–T10)**, from the prompt-engineering overview, the prompting best-practices reference, and the Fable 5 prompting guide:
 
@@ -101,14 +101,14 @@ Facts the product currently relies on (each is a registry entry retrieved 2026-0
 │   docs/CONTRACT-INVARIANTS.md)                                        │
 │                                                                       │
 │ KNOWLEDGE ENGINE  (core/knowledge/ — versioned data packs; exists)    │
-│  common: rubric R1–R10 (+ misuse policy/notices, authored in M1)      │
-│  anthropic: claims.json registry · techniques · event taxonomy        │
-│             · pattern library                                         │
+│  common: rubric R1–R10 · misuse policy · rewrite policy · notices     │
+│  anthropic: claims.json registry (verified) · techniques              │
+│             · event taxonomy · pattern library                        │
 └───────────────┬───────────────────────────────────────────────────────┘
                 │ validated by / rendered by
 ┌───────────────▼───────────────────────────────────────────────────────┐
 │ CORE LIBRARY  (src/prompt_debugger/ — Python 3.10+, stdlib only)      │
-│  ── implemented in Milestone M2; at M0 the package ships only         │
+│  ── implemented in Milestone M2; today the package ships only         │
 │     version constants (__init__.py) and path resolution (paths.py) ── │
 │  store    locking · atomic append · migrate · doctor · archive   (M2) │
 │  schema   JSON-Schema-subset validator                           (M2) │
@@ -141,7 +141,8 @@ Step 0  INTAKE      Identify inputs. If an event is referenced but not quoted,
                     ask for the visible text verbatim (accept "not available").
                     Wrap all user-supplied artifacts in explicit data tags;
                     treat strictly as data under analysis (§7 S1).
-Step 1  OBSERVE     Classify the event against core/taxonomy (versioned).
+Step 1  OBSERVE     Classify the event against the knowledge-pack event
+                    taxonomy (versioned).
                     No documented match → kind: unknown, with the honest
                     statement of what can and cannot be concluded.
 Step 2  GATE        Run the misuse decision procedure (§6.6).
@@ -177,12 +178,18 @@ prompt-debugger/
 │   ├── contracts/                   # 8 versioned contracts: one dir each with
 │   │   ├── prompt-ir/ · report/ · rewrite-report/ · events/
 │   │   ├── storage/ · knowledge/ · plugin-api/ · prompt-tree/
+│   │   │                            #  (knowledge/ also holds the 3 additive
+│   │   │                            #   policy schemas: misuse-policy,
+│   │   │                            #   rewrite-policy, notices — M1 FR-3)
 │   │   └── README.md                # subset rules + composite-validation rules
 │   └── knowledge/                   # KNOWLEDGE ENGINE (versioned data packs)
 │       ├── manifest.json
 │       └── packs/
-│           ├── common/              # rubric.json + rubric.md (R1–R10)
-│           └── anthropic/           # claims.json · techniques(.json/.md)
+│           ├── common/              # rubric(.json/.md) R1–R10
+│           │                        #  · misuse-policy(.json/.md)
+│           │                        #  · rewrite-policy(.json/.md)
+│           │                        #  · notices(.json/.md)
+│           └── anthropic/           # claims.json (verified) · techniques(.json/.md)
 │                                    #  · events(.json/.md) · patterns/
 ├── src/prompt_debugger/             # CORE LIBRARY (stdlib-only)
 │   └── __init__.py · paths.py · py.typed     # M0 scope; modules land in M2
@@ -203,13 +210,15 @@ prompt-debugger/
 │   ├── ARCHITECTURE.md · CONTRACT-INVARIANTS.md · DATAFLOW.md
 │   ├── GLOSSARY.md · THREAT-MODEL.md · PRIVACY.md · ETHICS.md
 │   ├── ROADMAP.md · COMPATIBILITY.md · OVERVIEW.md
-│   ├── adr/ (0001–0008 + template) · design/ (prompt-tree.md)
+│   ├── adr/ (0001–0009 + template)
+│   ├── design/ (prompt-tree.md · policy-architecture.md · policy-schemas.md)
+│   ├── process/ (policy-review.md) · releases/ (M0.md)
 ├── .github/ (workflows/ci.yml · release.yml · ISSUE_TEMPLATE · PR template)
 ├── requirements-dev.txt             # pytest, ruff, mypy, jsonschema (dev only)
 └── pyproject.toml                   # tooling config; no runtime deps
 ```
 
-**Planned additions (do not exist yet):** `core/knowledge/packs/common/` misuse policy, rewrite contract, and notices files (M1); the library modules `store/schema/verify/redact/sanitize/render/cli` (M2); per-skill `evals/evals.json` and the semantic-eval harnesses (M3); `docs/INSTALL.md`, `docs/USAGE.md`, and `examples/` (M5); the benchmark performance harness (`benchmarks/perf/`, M2).
+**Planned additions (do not exist yet):** the library modules `store/schema/verify/redact/sanitize/render/cli` (M2); per-skill `evals/evals.json` and the semantic-eval harnesses (M3); `docs/INSTALL.md`, `docs/USAGE.md`, and `examples/` (M5); the benchmark performance harness (`benchmarks/perf/`, M2).
 
 ---
 
@@ -253,7 +262,7 @@ allowed-tools: >
 
 `run.py` is a shim that locates the in-repo library via a stable relative path and dispatches to `prompt_debugger.cli`. All three launcher spellings are pre-approved for cross-platform use (§6.9).
 
-### 6.3 Prompt IR (`core/schemas/prompt-ir.schema.json`)
+### 6.3 Prompt IR (`core/contracts/prompt-ir/prompt-ir.schema.json`)
 
 A pragmatic intermediate representation — segmentation, not parsing:
 
@@ -276,22 +285,27 @@ A pragmatic intermediate representation — segmentation, not parsing:
 - **Integrity rule:** every `segments[].text` and every finding evidence quote must be a **verbatim substring of the source prompt**. The verifier (`verify`, M2) checks this deterministically; a failed check is surfaced to the model for one repair pass, then to the user. This converts "LLM hallucinated its evidence" from an invisible failure into a caught one. (Reference checkers for the already-testable invariants exist now — see `docs/CONTRACT-INVARIANTS.md`.)
 - Segmentation may be non-exhaustive (`unsegmented_remainder: true`) — full tiling is not required, avoiding brittleness on unusual prompts.
 
-### 6.4 Report JSON (`core/schemas/report.schema.json`) — the system of record
+### 6.4 Report JSON (`core/contracts/report/report.schema.json`) — the system of record
 
 ```json
 {
   "report_version": 1,
-  "taxonomy_version": "2026.07",
-  "rubric_version": "2026.07",
   "created_at": "2026-07-07T12:00:00Z",
+  "knowledge": {
+    "knowledge_version": "2026.07-m1",
+    "provider": "anthropic",
+    "rubric_version": "2026.07-m1",
+    "policy_version": "2026.07-m1"
+  },
   "event": {
+    "event_version": 1,
     "kind": "refusal_message",
     "surface": "cli",
     "verbatim": "…",
     "documented_match": "evt-refusal-visible",
     "notes": "kind=unknown when no documented pattern matches"
   },
-  "ir": { "ir_version": 1, "segments": [] },
+  "ir": { "ir_version": 1, "segments": [], "unsegmented_remainder": true },
   "findings": [
     {
       "id": "f1",
@@ -306,7 +320,9 @@ A pragmatic intermediate representation — segmentation, not parsing:
     { "hypothesis": "…", "confidence": "medium", "reasoning": "…" }
   ],
   "rewrite": {
+    "rewrite_version": 1,
     "gate": "passed",
+    "gate_reason": null,
     "text": "…",
     "changes": [{ "change": "…", "technique": "T4", "rationale": "…" }],
     "notices": ["non_guarantee"]
@@ -316,13 +332,15 @@ A pragmatic intermediate representation — segmentation, not parsing:
 
 (Prose annotation above; the shipped schema is strict JSON, subset-conformant.) `event`, `estimates`, and `rewrite` are nullable; `rewrite.gate` ∈ `passed · declined · conditional` (conditional = rewritten, but flagged that the same visible behavior may still occur). The Markdown the user reads is a **projection** of this object; the renderer (M2) regenerates it, and history/compare/trends operate exclusively on Report JSON.
 
-### 6.5 Event taxonomy (`core/taxonomy/observable-events.md`)
+### 6.5 Event taxonomy (`core/knowledge/packs/anthropic/events.json` + `events.md`)
 
 Versioned entries, each with: event ID, what the user sees, which surface(s), the documented API correlate (with claim-registry IDs), what can honestly be concluded, and what cannot. Kinds: `refusal_message · model_switch · api_refusal_stop_reason · api_fallback_block · error · unknown · none`. The `unknown` entry is first-class: its handling text tells the model to quote the event, state that it matches no documented pattern in this taxonomy version, and proceed with prompt-quality analysis without causal claims.
 
-### 6.6 Legitimacy gate and rewrite contract (`core/policy/`)
+### 6.6 Legitimacy gate and rewrite contract (`core/knowledge/packs/common/`)
 
-**Decision procedure (misuse-policy.md):**
+Implemented in M1 FR-3 as frozen, schema-validated declarative data: `misuse-policy.json`, `rewrite-policy.json`, and `notices.json`, each with a prose companion. The design record is [docs/design/policy-architecture.md](design/policy-architecture.md) and [docs/design/policy-schemas.md](design/policy-schemas.md); this section summarizes the semantics.
+
+**Decision procedure (`misuse-policy.json`, steps MISUSE-010–014):**
 
 1. Construct the **most plausible legitimate reading** and the **most plausible harmful reading** of the prompt plus any user-stated purpose.
 2. If the user has *stated* the goal is to defeat, bypass, or slip past safeguards → **decline the rewrite** (fixed template), explain the observable event normally, and state that a rewrite can be offered only for a legitimate purpose the user actually articulates.
@@ -330,7 +348,7 @@ Versioned entries, each with: event ID, what the user sees, which surface(s), th
 4. If purpose is missing and the harmful reading is plausible → **ask** for the purpose; never guess-fill. The answer becomes part of the rewrite as explicit stated context.
 5. Record the outcome in `rewrite.gate`; adversarial evals assert these branches (§10).
 
-**Transformation rules (rewrite-contract.md):**
+**Transformation rules (`rewrite-policy.json`, RW-001–009 allowed / RW-050–055 prohibited):**
 
 | Allowed | Prohibited |
 |---|---|
@@ -342,13 +360,13 @@ Versioned entries, each with: event ID, what the user sees, which surface(s), th
 
 **Invariant:** a rewrite may make intent *more* explicit, never less — and may only use facts the user actually supplied.
 
-**Fixed notices (notices.md):** the epistemic notice (estimates are educated guesses; moderation/routing internals are not public; analysis is based only on visible information) and the non-guarantee notice, verbatim:
+**Fixed notices (`notices.json` — the single source of truth for wording, drift-checked against its `notices.md` companion):** the epistemic notice (estimates are hypotheses; provider internals are not public; analysis uses only visible information) and the non-guarantee notice, verbatim as shipped (NOTICE-001):
 
-> *"This rewrite is intended to improve clarity and communicate your legitimate intent more effectively. It does not guarantee a different response, as model behavior depends on the provider's systems and policies."*
+> *"This rewrite is intended to improve clarity and communicate your legitimate intent more effectively. It does not guarantee a different response: model behavior depends on the provider's systems and policies, which this tool does not control or predict."*
 
 ### 6.7 Schema validation strategy
 
-Schemas are standard **JSON Schema draft 2020-12 restricted to a documented subset**: `type`, `enum`, `const`, `required`, `properties`, `items`, `additionalProperties: false`, `pattern`, `minLength/maxLength`, `minimum/maximum`, `minItems/maxItems`, nullable via `type` arrays. `schema.py` implements exactly this subset (unit-tested). CI runs **differential validation**: the `jsonschema` package (dev-only) validates every schema fixture and must agree with `schema.py` on accept/reject; disagreement fails the build. A CI meta-check rejects any schema using constructs outside the subset.
+Schemas are standard **JSON Schema draft 2020-12 restricted to a documented subset**: `type`, `enum`, `const`, `required`, `properties`, `items`, `additionalProperties: false`, `pattern`, `minLength/maxLength`, `minimum/maximum`, `minItems/maxItems`, nullable via `type` arrays. Today, a CI meta-check (`tools/validate_schemas.py` + `tools/_subset.py`) rejects any schema using constructs outside the subset, and the dev-only `jsonschema` package validates every seed instance against its schema. The in-repo runtime validator `schema.py` lands in M2 and will implement exactly this subset; from then CI additionally runs **differential validation** — `jsonschema` and `schema.py` must agree on accept/reject for every schema and fixture, and disagreement fails the build.
 
 ### 6.8 Storage specification
 
@@ -366,7 +384,7 @@ Schemas are standard **JSON Schema draft 2020-12 restricted to a documented subs
 - **Paths:** forward slashes in all skill content; `pathlib` everywhere in the library; no reliance on `HOME` vs `USERPROFILE` (use `pathlib.Path.home()`).
 - **CI matrix:** ubuntu-latest, macos-latest, windows-latest for the full test suite.
 - **Install matrix** (user-facing write-up in `docs/INSTALL.md`, authored in M5): (a) plugin install from marketplace (primary); (b) clone + symlink into `~/.claude/skills/` (documented with Windows caveats); copying `skills/` alone is **unsupported** (breaks vendored-core references) and documented as such.
-- **M1 exit criterion:** fresh plugin-install smoke test passes on all three OSes.
+- **Install verification:** the fresh plugin-install smoke test on all three OSes is an M5 exit criterion (packaging/install milestone, per the [roadmap](ROADMAP.md)).
 
 ---
 
@@ -448,15 +466,15 @@ Eval-driven development order preserved: write evals before skill content; basel
 
 Each milestone is validated against a fixed engineering review checklist — correctness, architecture, security, privacy, edge cases, maintainability, documentation quality, and test coverage — before it is considered complete. A milestone does not close while any accepted finding remains open.
 
-| M | Deliverable | Exit criteria |
-|---|-------------|---------------|
-| M0 | Scaffold: repo structure, LICENSE, README, CONTRIBUTING, CI, ADR baseline, this document | CI green on all 3 OSes; license recorded in an ADR |
-| M1 | **Core contracts**: all schemas + subset validator + differential tests; taxonomy + claim registry (every claim sourced/dated, incl. consumer-surface fallback verification); rubric; misuse policy + rewrite contract + notices; fresh plugin-install smoke test | Citations verified against sources; contract coherence checked; 3-OS install test passes |
-| M2 | **Core library**: store/verify/redact/sanitize/render/cli + unit, contract, benchmark suites | Full coverage of §6.8 behaviors incl. locking, doctor, migrate; benchmarks recorded |
-| M3 | **`analyze` + `rewrite` skills** + trigger evals + adversarial/injection/meaning-preservation/rubric-calibration suites | Golden + adversarial evals pass; gate branches verified; evidence-verification loop works end-to-end |
-| M4 | **`history` skill** wiring + privacy verifications | Raw-storage UX (rare/loud/reversible) verified; export redaction verified; permission-profile contract green |
-| M5 | Docs (INSTALL/USAGE/PRIVACY/ETHICS/GLOSSARY/SOURCES), examples, packaging, release trust pipeline | Fresh-machine installs on 3 OSes; examples reproduce; release dry-run with checksums + attestations |
-| M6 | Final security/privacy review; v1.0.0 | Full-repo security and privacy review complete; all findings closed |
+| M | Deliverable | Exit criteria | State |
+|---|-------------|---------------|-------|
+| M0 | **Engineering foundation**: repo structure, the 8 versioned contracts + schemas, Knowledge Engine structure with seed content, benchmarks, tooling, tests, ADRs, docs, CI | CI green on all 3 OSes; independent review passed | **complete** — `v0.1.0-alpha`; record: [releases/M0.md](releases/M0.md) |
+| M1 | **Knowledge verification & policy authoring** ([spec](../specs/M1.md)): every claim verified/stale/retired against its live source (incl. the consumer-surface fallback resolution); misuse policy + rewrite policy + notices authored in `common`; taxonomy prose completed; patterns and version bookkeeping | Spec acceptance criteria met; knowledge-integrity tests green; independent verification | **complete** — `v0.2.0-alpha`; record: [releases/M1.md](releases/M1.md) |
+| M2 | **Core library**: store/schema/verify/redact/sanitize/render/cli + unit, differential, contract, benchmark suites | Full coverage of §6.8 behaviors incl. locking, doctor, migrate; benchmarks recorded | planned |
+| M3 | **`analyze` + `rewrite` skills** + trigger evals + adversarial/injection/meaning-preservation/rubric-calibration suites | Golden + adversarial evals pass; gate branches verified; evidence-verification loop works end-to-end | planned |
+| M4 | **`history` skill** wiring + privacy verifications | Raw-storage UX (rare/loud/reversible) verified; export redaction verified; permission-profile contract green | planned |
+| M5 | Docs (INSTALL/USAGE), examples, packaging, release trust pipeline | Fresh-machine installs on 3 OSes; examples reproduce; release dry-run with checksums + attestations | planned |
+| M6 | Final security/privacy review; v1.0.0 | Full-repo security and privacy review complete; all findings closed | planned |
 
 ---
 
@@ -485,7 +503,7 @@ The following decisions are settled and reflected in the M0 implementation:
 
 ## 15. Sources
 
-Public documents grounding §2 (each is a dated entry in [`core/knowledge/packs/anthropic/claims.json`](../core/knowledge/packs/anthropic/claims.json), currently `status: "recorded"`; verified against live sources in M1):
+Public documents grounding §2 (each is a dated entry in [`core/knowledge/packs/anthropic/claims.json`](../core/knowledge/packs/anthropic/claims.json), `status: "verified"` with `last_verified` dates recorded in the registry):
 
 - Claude Code — Skills: `https://code.claude.com/docs/en/skills`
 - Agent Skills — Authoring best practices: `https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices`
@@ -493,5 +511,9 @@ Public documents grounding §2 (each is a dated entry in [`core/knowledge/packs/
 - Prompting best practices (living reference): `https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices`
 - Prompting Claude Fable 5: `https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5`
 - Refusals and fallback: `https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback`
+- Handling stop reasons: `https://platform.claude.com/docs/en/api/handling-stop-reasons`
+- Claude Code — Model configuration (automatic model fallback): `https://code.claude.com/docs/en/model-config`
+- Claude Help Center — Why Claude switched models (Fable 5): `https://support.claude.com/en/articles/15363606-why-claude-switched-models-in-your-conversation-with-fable-5`
+- Cookbook — Classifier fallback and billing for Claude Fable 5: `https://platform.claude.com/cookbook/fable-5-fallback-billing-guide`
 - API errors reference: `https://platform.claude.com/docs/en/api/errors`
 - Agent Skills open standard: `https://agentskills.io`

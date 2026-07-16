@@ -51,7 +51,7 @@ Policy has **two independent evolution axes**, and each policy file names both:
 | Field | Type | Governs | Bumped when |
 |---|---|---|---|
 | `schema_version` | integer `const` | The **shape** of the file (which fields exist, their types, their enums). Mirrors the `$id`'s `/vN`. This is the contract/format version, subject to VC-1/VC-2. | The schema changes shape (see Compatibility model). |
-| `policy_version` | string, `^[0-9]{4}\.[0-9]{2}(-[a-z0-9]+)?$` | The **content** of the file (which entries exist, their wording, their outcomes). Reports pin it for reproducibility. | The policy content changes, with the shape unchanged. |
+| `policy_version` | string, `^[0-9]{4}\.(0[1-9]|1[0-2])(-[a-z0-9]+)?$` | The **content** of the file (which entries exist, their wording, their outcomes). Reports pin it for reproducibility (`report.knowledge.policy_version`, optional in Report v1). | The policy content changes, with the shape unchanged. |
 
 These are deliberately separate concerns: the wording of a decline template or the addition of a transformation is a *content* event (`policy_version`) that must not be conflated with a *format* event (`schema_version`). Older knowledge files (`claims.json`, `events.json`, `rubric.json`) use a single `file_version` integer for the format axis; the policy files rename that axis to `schema_version` precisely to sit it beside `policy_version` and make the independence explicit and legible. Functionally `schema_version` plays the same role `file_version` plays elsewhere (an integer `const` format version); only the name differs, and the [knowledge contract](../../core/contracts/knowledge/CONTRACT.md) records the reason.
 
@@ -79,6 +79,8 @@ Because policy has two version axes, it has two families of change. Each schema 
 | **Breaking** | Remove or rename a field; make an optional field required; narrow an enum; tighten a pattern; change a type; lower a `maxItems`. | New `schema_version` **and** a new `$id` `/vN` (VC-1). Readers must be upgraded. |
 
 There are no "compatible" shape changes distinct from additive ones: a shape edit either only adds optional surface (additive) or it breaks (new version).
+
+> **Recorded exception (FR-3.1, pre-1.0):** the `policy_version` pattern was tightened from `[0-9]{2}` to `(0[1-9]|1[0-2])` for the month, rejecting calendar-impossible values. Formally a pattern-tightening (breaking by this table), it was taken in-version under the alpha pre-release rule because no valid instance ever existed or could exist in the rejected space — every shipped `policy_version` remains valid. Post-1.0, even a change like this takes a new `schema_version`.
 
 **Content changes — governed by `policy_version`.**
 
@@ -146,7 +148,7 @@ There are **no optional fields** in v1; every field is required. This is deliber
   "required": ["schema_version", "policy_version", "classes", "procedure", "elicitation", "decline_templates", "status"],
   "properties": {
     "schema_version": { "const": 1 },
-    "policy_version": { "type": "string", "pattern": "^[0-9]{4}\\.[0-9]{2}(-[a-z0-9]+)?$" },
+    "policy_version": { "type": "string", "pattern": "^[0-9]{4}\\.(0[1-9]|1[0-2])(-[a-z0-9]+)?$" },
     "classes": {
       "type": "array",
       "minItems": 3,
@@ -298,7 +300,7 @@ There are **no optional fields** in v1; every field is required. This is deliber
   "required": ["schema_version", "policy_version", "allowed_transformations", "prohibited_transformations", "guarantees", "notice_rules", "status"],
   "properties": {
     "schema_version": { "const": 1 },
-    "policy_version": { "type": "string", "pattern": "^[0-9]{4}\\.[0-9]{2}(-[a-z0-9]+)?$" },
+    "policy_version": { "type": "string", "pattern": "^[0-9]{4}\\.(0[1-9]|1[0-2])(-[a-z0-9]+)?$" },
     "allowed_transformations": {
       "type": "array",
       "minItems": 1,
@@ -431,7 +433,7 @@ No optional fields.
   "required": ["schema_version", "policy_version", "notices"],
   "properties": {
     "schema_version": { "const": 1 },
-    "policy_version": { "type": "string", "pattern": "^[0-9]{4}\\.[0-9]{2}(-[a-z0-9]+)?$" },
+    "policy_version": { "type": "string", "pattern": "^[0-9]{4}\\.(0[1-9]|1[0-2])(-[a-z0-9]+)?$" },
     "notices": {
       "type": "array",
       "minItems": 1,

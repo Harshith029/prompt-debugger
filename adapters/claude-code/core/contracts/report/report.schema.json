@@ -20,7 +20,13 @@
       "properties": {
         "knowledge_version": { "type": "string", "minLength": 1 },
         "provider": { "type": "string", "minLength": 1 },
-        "rubric_version": { "type": "string", "minLength": 1 }
+        "rubric_version": { "type": "string", "minLength": 1 },
+        "policy_version": {
+          "type": ["string", "null"],
+          "minLength": 1,
+          "default": null,
+          "description": "Content version of the common-pack policy files (misuse-policy, rewrite-policy, notices) used to produce this report. Optional/null only for reports produced before the policy layer existed or without a loaded policy corpus; M2+ producers populate it whenever policy informed the report."
+        }
       },
       "description": "Which Knowledge Engine versions produced this report."
     },

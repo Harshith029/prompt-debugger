@@ -6,7 +6,7 @@
 
 ## Semantics
 
-- `knowledge` pins the Knowledge Engine versions used, making every report reproducible against a specific rubric/taxonomy state.
+- `knowledge` pins the Knowledge Engine versions used, making every report reproducible against a specific rubric/taxonomy/policy state. `policy_version` (added in-version as an optional field, per the compatibility rule below) pins the common-pack policy content; it is null only for reports produced before the policy layer existed or without a loaded policy corpus — M2+ producers populate it whenever policy informed the report.
 - `event` is `null` for pure quality reviews (no observable event was reported).
 - `estimates` exist **only** when an event was reported, and are hypotheses with confidence labels — the honesty architecture's "Estimated" layer. The "Observed" layer is the `event` object.
 - `findings[].evidence[].quote` is verbatim-substring-verified against the source prompt; `segment` ties evidence to Prompt IR structure.

@@ -1,6 +1,6 @@
 [project]
 name = "prompt-debugger"
-version = "0.1.0a0"
+version = "0.2.0a0"
 description = "Understand observable AI model behavior and improve prompt quality. Host-neutral core; Claude Code adapter."
 readme = "README.md"
 requires-python = ">=3.10"

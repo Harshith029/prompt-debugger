@@ -1,17 +1,17 @@
 {
   "file_version": 1,
-  "taxonomy_version": "2026.07-draft",
+  "taxonomy_version": "2026.07-m1",
   "entries": [
     {
       "id": "evt-refusal-visible",
       "kind": "refusal_message",
       "title": "Visible safeguard / refusal message",
-      "user_sees": "A message declining or redirecting the request, often mentioning that it cannot help with the request as phrased.",
-      "surfaces": ["web", "cli", "api", "other", "unspecified"],
-      "api_correlate": "On the API this class of outcome corresponds to a response with stop_reason 'refusal', optionally with a stop_details category.",
-      "can_conclude": "That the request, as submitted, produced a decline the user could see. The visible text is the evidence.",
-      "cannot_conclude": "Why it was declined, which specific classifier or rule applied, or any threshold. Do not infer internal moderation logic.",
-      "source_claims": ["clm-refusal-stop-reason", "clm-fable-classifier-scope"],
+      "user_sees": "A message rendered by a product surface declining or redirecting the request, often stating that it cannot help with the request as phrased.",
+      "surfaces": ["web", "cli", "desktop", "other", "unspecified"],
+      "api_correlate": "The API-side correlate of this outcome is a successful (HTTP 200) response — not an HTTP error — with stop_reason 'refusal' and a stop_details object of type 'refusal'. stop_details may carry a documented category (cyber, bio, frontier_llm, reasoning_extraction) and a human-readable explanation; both are null when the decline maps to no named category. When the observation itself is that raw API response, classify it as evt-api-refusal-stop-reason per the observation-channel rule (events.md), not as this entry.",
+      "can_conclude": "That the request, as submitted, produced a decline the user could see on a product surface; the visible text is the evidence.",
+      "cannot_conclude": "Why the request was declined beyond any documented category shown, which specific classifier or rule applied, any threshold, or whether a rephrased request would fare differently. Do not infer internal moderation logic from the wording of the visible message.",
+      "source_claims": ["clm-refusal-stop-reason", "clm-fable-classifier-scope", "clm-stop-reasons"],
       "status": "draft"
     },
     {
@@ -19,23 +19,23 @@
       "kind": "model_switch",
       "title": "Visible model switch after a safeguard event",
       "user_sees": "An indication that the response was produced by a different model than requested (e.g., a request intended for one model answered by Claude Opus 4.8), sometimes alongside or after a safeguard notice.",
-      "surfaces": ["web", "cli", "unspecified"],
-      "api_correlate": "On the API, a configured fallback surfaces as a content block of type 'fallback' (from/to models) and the response 'model' field names the serving model. Whether a given consumer surface uses this mechanism or displays a switch notice is treated as user-reported observation until clm-consumer-surface-fallback is verified.",
-      "can_conclude": "That the user observed a switch in which model answered. The switch the user saw is a fact about their screen.",
-      "cannot_conclude": "The mechanism a specific consumer surface used, or that a switch always follows a decline. Cite only the documented API mechanism; attribute the surface behavior to the user's report.",
-      "source_claims": ["clm-fallback-block", "clm-fable-classifier-scope", "clm-consumer-surface-fallback"],
+      "surfaces": ["web", "cli", "desktop", "other", "unspecified"],
+      "api_correlate": "On the API, a configured fallback surfaces as a content block of type 'fallback' with from/to model sub-objects; the response's top-level 'model' field names the serving model and usage.iterations records each attempt, and documented sticky routing can serve a later turn on the fallback model with no fallback block (clm-fallback-block). When the observation is the raw API response, classify it as evt-api-fallback-block per the observation-channel rule (events.md). Product surfaces document their own behavior separately: Claude Code re-runs a classifier-flagged request on the provider's default Opus model and shows a notice in the transcript (clm-claude-code-fallback); the Claude consumer apps switch automatically by default, show a notice, and label the response with the answering model (clm-webapp-switch-notice). The platform API page itself documents no consumer-surface behavior (clm-consumer-surface-fallback).",
+      "can_conclude": "That the user observed the response being attributed to a different model than the one requested — the switch they saw is a fact about their screen. On surfaces with documented behavior, the documented behavior may additionally be cited: in Claude Code, that a classifier-flagged request is re-run on the provider's default Opus model with a transcript notice and the session continues on that model (clm-claude-code-fallback); in the Claude consumer apps, that automatic switching is on by default, a notice is shown, the response is labeled with the answering model, and the user can switch back from the model picker (clm-webapp-switch-notice).",
+      "cannot_conclude": "The exact wording or appearance of any switch notice (not documented); classifier internals or thresholds; that a visible switch always means a safeguard decline — Claude Code also documents availability-based fallback model chains distinct from content-based fallback (clm-claude-code-fallback); or anything about a surface whose behavior no tracked official document describes — there, the switch remains the user's report.",
+      "source_claims": ["clm-fallback-block", "clm-fable-classifier-scope", "clm-consumer-surface-fallback", "clm-claude-code-fallback", "clm-webapp-switch-notice"],
       "status": "draft"
     },
     {
       "id": "evt-api-refusal-stop-reason",
       "kind": "api_refusal_stop_reason",
       "title": "API stop_reason: refusal",
-      "user_sees": "A JSON response with stop_reason 'refusal' and possibly a stop_details object.",
+      "user_sees": "A successful API response whose stop_reason is 'refusal', with a stop_details object of type 'refusal' that may carry a category and explanation.",
       "surfaces": ["api"],
-      "api_correlate": "stop_reason 'refusal'; stop_details.category among documented values or null.",
-      "can_conclude": "That the API declined this request and, if present, the documented category label.",
-      "cannot_conclude": "The classifier internals behind the category, or thresholds. category may be null even on a refusal.",
-      "source_claims": ["clm-refusal-stop-reason"],
+      "api_correlate": "stop_reason 'refusal' on an HTTP 200 response; stop_details.category among the documented values (cyber, bio, frontier_llm, reasoning_extraction) or null, with explanation null in the same case. stop_details is null for every stop_reason other than 'refusal'; on Message Batches results it may be null even on a refusal, so detection checks stop_reason directly. When the blocked request had a billable cached prefix, stop_details may also carry a fallback_credit_token, redeemable on a fallback-model retry for cache-read pricing (clm-cookbook-fallback-billing).",
+      "can_conclude": "That the API declined this request on an otherwise successful response, and — when present — the documented category label and explanation. The documented follow-up is to read stop_details and optionally retry on a fallback model; a fallback_credit_token, when present, is the documented billing bridge for that retry.",
+      "cannot_conclude": "The classifier internals or thresholds behind a category; anything more from a null category than that the decline maps to no named category; or that resubmitting the same request must produce the same outcome.",
+      "source_claims": ["clm-refusal-stop-reason", "clm-stop-reasons", "clm-cookbook-fallback-billing"],
       "status": "draft"
     },
     {
@@ -44,9 +44,9 @@
       "title": "API fallback content block",
       "user_sees": "A content block of type 'fallback' with from/to model fields; the response 'model' names the serving model.",
       "surfaces": ["api"],
-      "api_correlate": "Documented fallback content block.",
-      "can_conclude": "That a configured fallback served the response and which model did.",
-      "cannot_conclude": "That fallback implies a policy decline in every case, or any internal routing detail.",
+      "api_correlate": "A content block of type 'fallback' with from/to model sub-objects marks each point where one model's output gives way to the next; the response's top-level 'model' field names the model that produced the returned message, and usage.iterations records every attempt (declining models as 'message' entries, the serving model as a 'fallback_message' entry).",
+      "can_conclude": "That a configured fallback served the response, which model produced the returned message, and where in the content the hand-off occurred.",
+      "cannot_conclude": "That fallback implies a safeguard decline in every case — fallback is a configured mechanism, and this taxonomy asserts no trigger beyond what the block itself records. That the absence of a fallback block proves the requested model served the turn — documented sticky routing can serve a fallback turn with no block; check usage.iterations. Or any internal routing detail beyond the documented fields.",
       "source_claims": ["clm-fallback-block"],
       "status": "draft"
     },
@@ -56,10 +56,10 @@
       "title": "User-visible error",
       "user_sees": "An error such as an authentication problem, permission denial, request-too-large, rate limit, or an overloaded/temporary-failure message.",
       "surfaces": ["web", "cli", "api", "other", "unspecified"],
-      "api_correlate": "One of the documented HTTP error codes and their type strings (see clm-api-errors): 400 invalid_request_error, 401 authentication_error, 402 billing_error, 403 permission_error, 404 not_found_error, 409 conflict_error, 413 request_too_large, 429 rate_limit_error, 500 api_error, 504 timeout_error, 529 overloaded_error.",
-      "can_conclude": "The documented meaning of the specific HTTP error code and type string the user saw.",
-      "cannot_conclude": "Provider-side capacity state or anything beyond the documented meaning of the code. Output-length/context-window stop conditions (e.g. a truncated response) are a distinct observable whose dedicated source verification is pending (see clm-api-errors notes); do not conflate them with these HTTP errors.",
-      "source_claims": ["clm-api-errors"],
+      "api_correlate": "One of the documented HTTP error codes and their type strings (see clm-api-errors): 400 invalid_request_error, 401 authentication_error, 402 billing_error, 403 permission_error, 404 not_found_error, 409 conflict_error, 413 request_too_large, 429 rate_limit_error, 500 api_error, 504 timeout_error, 529 overloaded_error. Errors are returned as JSON with a top-level 'error' object carrying 'type' and 'message', plus a request_id.",
+      "can_conclude": "The documented meaning of the specific HTTP error code and type string the user saw, and — on the API — the documented error-object shape ('type', 'message', request_id).",
+      "cannot_conclude": "Provider-side capacity or account state beyond the documented meaning of the code. A truncated or cut-off response is not one of these errors: truncation surfaces on a successful response as stop_reason 'max_tokens' or 'model_context_window_exceeded' (clm-stop-reasons); do not conflate a stop condition with an HTTP error.",
+      "source_claims": ["clm-api-errors", "clm-stop-reasons"],
       "status": "draft"
     },
     {
@@ -70,7 +70,7 @@
       "surfaces": ["unspecified"],
       "api_correlate": null,
       "can_conclude": "That the user is asking for prompt-quality help, not event explanation.",
-      "cannot_conclude": "N/A.",
+      "cannot_conclude": "Nothing event-related may be concluded or attached: with no reported event, the report carries no estimates layer, and findings are limited to prompt quality.",
       "source_claims": [],
       "status": "draft"
     }

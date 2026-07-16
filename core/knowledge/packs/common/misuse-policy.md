@@ -1,4 +1,4 @@
-# Misuse Policy — prose companion (policy_version 2026.07-draft)
+# Misuse Policy — prose companion (policy_version 2026.07-m1)
 
 Human/model-readable exposition of the misuse classification defined in [`misuse-policy.json`](misuse-policy.json). Ids match one-to-one. The JSON is what machines validate; this file is what analysis-layer adapters read. Design basis: [policy architecture §4](../../../../docs/design/policy-architecture.md).
 
@@ -26,7 +26,14 @@ When a request is ambiguous, ask what the user is trying to accomplish and why, 
 
 ## Decline templates
 
-- **MISUSE-020** — used when the request appears aimed at getting around a safety system. Invites a legitimate user to restate intent; the observable event is still explained.
-- **MISUSE-021** — used when no legitimate reading could be found that a rewrite would clarify.
+**Source of truth: [`misuse-policy.json`](misuse-policy.json).** As with notice texts, the JSON holds the authoritative decline wording; the gate emits it from there, not from model output, so refusals are stable and testable. The block-quoted texts below are **derived** verbatim copies for human reading — the integrity suite (`tests/test_knowledge_integrity.py`) fails if they drift from the JSON by a single character. To change a template, edit `misuse-policy.json` and update the quote here in the same change.
 
-Decline wording is fixed here (not model-authored) so refusals are stable and testable. A declined gate produces no rewritten text but still yields an honest event explanation.
+**MISUSE-020** — used when the request appears aimed at getting around a safety system. Invites a legitimate user to restate intent.
+
+> This request appears aimed at getting around a safety system, so a rewrite is not offered. If that is not your intent, tell me what you are trying to accomplish and why, and I will re-evaluate. The observable event is still explained below.
+
+**MISUSE-021** — used when no legitimate reading could be found that a rewrite would clarify.
+
+> I could not find a legitimate reading of this request that a rewrite could clarify, so a rewrite is not offered. The observable event is still explained below.
+
+A declined gate produces no rewritten text but still yields an honest event explanation.

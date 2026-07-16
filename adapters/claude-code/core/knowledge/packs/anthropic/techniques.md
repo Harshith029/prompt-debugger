@@ -1,8 +1,8 @@
-# Techniques — prose companion (anthropic pack, 2026.07-draft)
+# Techniques — prose companion (anthropic pack, 2026.07-m1)
 
 Extended guidance for the techniques in [`techniques.json`](techniques.json). Ids match. Every technique traces to one or more claims in [`claims.json`](claims.json); the analysis layer reads this file, machines validate the JSON.
 
-M1 expands each entry with worked before/after examples drawn from the pattern library and promotes status `draft → active` after the claim verification pass.
+Worked before/after examples live in the [pattern library](patterns/index.json), one per rubric dimension; each pattern cites the technique ids it applies. Every claim cited here is `verified` (M1); entries remain `status: draft` — promotion is deferred to M2, when the analyzer first binds to entry statuses (recorded in the [M1 milestone record](../../../../docs/releases/M1.md)).
 
 - **T1 Be clear and direct** — the golden rule (colleague test) and specificity. Grounds fixes for R1, R3.
 - **T2 Add context and motivation** — state audience, purpose, and the reason behind constraints. Grounds fixes for R2.
