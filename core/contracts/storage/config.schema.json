@@ -32,8 +32,8 @@
     "size_warn_records": {
       "type": "integer",
       "minimum": 1000,
-      "default": 50000,
-      "description": "Record count at which the CLI suggests 'archive'. Default is provisional until M2 benchmarks set a measured value."
+      "default": 1000,
+      "description": "Record count at which the CLI suggests 'archive'. Set from M2 FR-11 benchmarks: routine read scans are ~0.63 ms/record, so a full-history read crosses the 1-second interactive-responsiveness bound near this value (see benchmarks/perf/RESULTS.md)."
     }
   }
 }

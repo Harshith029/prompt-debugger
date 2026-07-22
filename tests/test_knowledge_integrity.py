@@ -230,6 +230,39 @@ def test_knowledge_snapshot_labels_agree() -> None:
         assert snapshot in header, f"{companion} header does not state '{snapshot}'"
 
 
+# --- FR-8: promotion state of the claim-grounded classes ------------------------------
+
+
+def test_fr8_promotion_state_of_claim_grounded_classes() -> None:
+    # specs/M2.md FR-8 acceptance criterion, made executable: every technique and
+    # event-taxonomy entry whose cited claims are all 'verified' is 'active'
+    # (the KN-2 criterion applied per entry); rubric dimensions and patterns
+    # remain 'draft' — they carry no claim-provenance relation, so their
+    # promotion criterion is deferred as open choice O7, not silently decided.
+    claim_status = {
+        c["id"]: c["status"] for c in _load(KN / "packs" / "anthropic" / "claims.json")["claims"]
+    }
+    techniques = _load(KN / "packs" / "anthropic" / "techniques.json")["techniques"]
+    for t in techniques:
+        # Techniques must cite claims to leave draft at all (enforced above), so
+        # the promotion criterion is only asserted where citations exist.
+        if t["source_claims"] and all(claim_status[c] == "verified" for c in t["source_claims"]):
+            assert t["status"] == "active", f"{t['id']}: all claims verified but not active"
+    entries = _load(KN / "packs" / "anthropic" / "events.json")["entries"]
+    for e in entries:
+        # "Every cited claim is verified" is vacuously satisfied by an empty
+        # citation list: kinds 'none'/'unknown' assert no provider behavior (the
+        # KN-1 carve-out) and were promoted under the recorded FR-8 decision
+        # (CHANGELOG), so entries like evt-none must be 'active' too.
+        if all(claim_status[c] == "verified" for c in e["source_claims"]):
+            assert e["status"] == "active", f"{e['id']}: promotion criterion holds but not active"
+    for d in _load(COMMON / "rubric.json")["dimensions"]:
+        assert d["status"] == "draft", f"{d['id']}: rubric promotion is deferred (O7)"
+    patterns = _load(KN / "packs" / "anthropic" / "patterns" / "index.json")["patterns"]
+    for p in patterns:
+        assert p["status"] == "draft", f"{p['id']}: pattern promotion is deferred (O7)"
+
+
 # --- FR-5.1: After examples demonstrate only permitted transformations ----------------
 
 _PLACEHOLDER_OR_TAG = re.compile(r"<[^<>]*>")

@@ -1,4 +1,4 @@
-# Rewrite Policy — prose companion (policy_version 2026.07-m1)
+# Rewrite Policy — prose companion (policy_version 2026.07-m2)
 
 Human/model-readable exposition of the rewrite rules defined in [`rewrite-policy.json`](rewrite-policy.json). Ids match one-to-one. The JSON is what machines validate; this file is what analysis-layer adapters read. Design basis: [policy architecture §3](../../../../docs/design/policy-architecture.md).
 

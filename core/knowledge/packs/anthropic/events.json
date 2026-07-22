@@ -1,6 +1,6 @@
 {
   "file_version": 1,
-  "taxonomy_version": "2026.07-m1",
+  "taxonomy_version": "2026.07-m2",
   "entries": [
     {
       "id": "evt-refusal-visible",
@@ -12,7 +12,7 @@
       "can_conclude": "That the request, as submitted, produced a decline the user could see on a product surface; the visible text is the evidence.",
       "cannot_conclude": "Why the request was declined beyond any documented category shown, which specific classifier or rule applied, any threshold, or whether a rephrased request would fare differently. Do not infer internal moderation logic from the wording of the visible message.",
       "source_claims": ["clm-refusal-stop-reason", "clm-fable-classifier-scope", "clm-stop-reasons"],
-      "status": "draft"
+      "status": "active"
     },
     {
       "id": "evt-model-switch-visible",
@@ -24,7 +24,7 @@
       "can_conclude": "That the user observed the response being attributed to a different model than the one requested — the switch they saw is a fact about their screen. On surfaces with documented behavior, the documented behavior may additionally be cited: in Claude Code, that a classifier-flagged request is re-run on the provider's default Opus model with a transcript notice and the session continues on that model (clm-claude-code-fallback); in the Claude consumer apps, that automatic switching is on by default, a notice is shown, the response is labeled with the answering model, and the user can switch back from the model picker (clm-webapp-switch-notice).",
       "cannot_conclude": "The exact wording or appearance of any switch notice (not documented); classifier internals or thresholds; that a visible switch always means a safeguard decline — Claude Code also documents availability-based fallback model chains distinct from content-based fallback (clm-claude-code-fallback); or anything about a surface whose behavior no tracked official document describes — there, the switch remains the user's report.",
       "source_claims": ["clm-fallback-block", "clm-fable-classifier-scope", "clm-consumer-surface-fallback", "clm-claude-code-fallback", "clm-webapp-switch-notice"],
-      "status": "draft"
+      "status": "active"
     },
     {
       "id": "evt-api-refusal-stop-reason",
@@ -36,7 +36,7 @@
       "can_conclude": "That the API declined this request on an otherwise successful response, and — when present — the documented category label and explanation. The documented follow-up is to read stop_details and optionally retry on a fallback model; a fallback_credit_token, when present, is the documented billing bridge for that retry.",
       "cannot_conclude": "The classifier internals or thresholds behind a category; anything more from a null category than that the decline maps to no named category; or that resubmitting the same request must produce the same outcome.",
       "source_claims": ["clm-refusal-stop-reason", "clm-stop-reasons", "clm-cookbook-fallback-billing"],
-      "status": "draft"
+      "status": "active"
     },
     {
       "id": "evt-api-fallback-block",
@@ -48,7 +48,7 @@
       "can_conclude": "That a configured fallback served the response, which model produced the returned message, and where in the content the hand-off occurred.",
       "cannot_conclude": "That fallback implies a safeguard decline in every case — fallback is a configured mechanism, and this taxonomy asserts no trigger beyond what the block itself records. That the absence of a fallback block proves the requested model served the turn — documented sticky routing can serve a fallback turn with no block; check usage.iterations. Or any internal routing detail beyond the documented fields.",
       "source_claims": ["clm-fallback-block"],
-      "status": "draft"
+      "status": "active"
     },
     {
       "id": "evt-user-visible-error",
@@ -60,7 +60,7 @@
       "can_conclude": "The documented meaning of the specific HTTP error code and type string the user saw, and — on the API — the documented error-object shape ('type', 'message', request_id).",
       "cannot_conclude": "Provider-side capacity or account state beyond the documented meaning of the code. A truncated or cut-off response is not one of these errors: truncation surfaces on a successful response as stop_reason 'max_tokens' or 'model_context_window_exceeded' (clm-stop-reasons); do not conflate a stop condition with an HTTP error.",
       "source_claims": ["clm-api-errors", "clm-stop-reasons"],
-      "status": "draft"
+      "status": "active"
     },
     {
       "id": "evt-none",
@@ -72,7 +72,7 @@
       "can_conclude": "That the user is asking for prompt-quality help, not event explanation.",
       "cannot_conclude": "Nothing event-related may be concluded or attached: with no reported event, the report carries no estimates layer, and findings are limited to prompt quality.",
       "source_claims": [],
-      "status": "draft"
+      "status": "active"
     }
   ]
 }

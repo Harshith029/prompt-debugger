@@ -9,7 +9,7 @@ scaffold imports cleanly and CI has a real module to type-check.
 
 from __future__ import annotations
 
-__version__ = "0.2.0a0"
+__version__ = "0.3.0a0"
 
 # Contract versions this library targets. Adapters pin against these; the
 # schema files under core/contracts/ are the source of truth. Kept here so

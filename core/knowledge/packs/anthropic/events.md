@@ -1,4 +1,4 @@
-# Observable Event Taxonomy — prose companion (anthropic pack, 2026.07-m1)
+# Observable Event Taxonomy — prose companion (anthropic pack, 2026.07-m2)
 
 Extended notes for the entries in [`events.json`](events.json). Ids match. This is the "Observed" layer's reference: it tells the analysis layer exactly what may and may not be concluded from each observation, and which claims back it.
 

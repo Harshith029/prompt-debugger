@@ -9,9 +9,9 @@ Versioned prompt-engineering knowledge, separated from implementation. Analyzers
 | [`packs/common/`](packs/common/pack.json) | provider-neutral | Quality rubric (R1–R10); misuse policy, rewrite contract, and fixed notices (M1) |
 | [`packs/anthropic/`](packs/anthropic/pack.json) | provider | Claim registry (dated public-doc claims), techniques (T1–T10), observable-event taxonomy, pattern library |
 
-## Status (M1 complete — the verified baseline for M2)
+## Status (M1 verified; claim-grounded classes promoted in M2)
 
-Structure, schemas, and content are CI-validated and frozen as of M1 close-out ([record](../../docs/releases/M1.md)): every claim in the registry is `status: "verified"` against its live source with a `last_verified` date; the `common` pack's misuse policy, rewrite policy, and notices are authored and frozen; the taxonomy's `can/cannot_conclude` prose is complete; the pattern library is complete, one pattern per rubric dimension; and the corpus is versioned as the `2026.07-m1` snapshot. Techniques, taxonomy entries, and patterns remain `status: "draft"` by recorded decision — promotion is deferred to M2, when the analyzer first binds to entry statuses (a content change requiring a snapshot bump under KN-10).
+Structure, schemas, and content are CI-validated: every claim in the registry is `status: "verified"` against its live source with a `last_verified` date (M1 close-out, [record](../../docs/releases/M1.md)); the `common` pack's misuse policy, rewrite policy, and notices are authored and frozen; the taxonomy's `can/cannot_conclude` prose is complete; and the pattern library is complete, one pattern per rubric dimension. The M2 FR-8 promotion pass made every **technique and event-taxonomy entry** `status: "active"` (each cites only `verified` claims — the KN-2 criterion; decision recorded in the CHANGELOG) and bumped the corpus to the `2026.07-m2` snapshot per KN-10. **Rubric dimensions and patterns remain `status: "draft"`**: they carry `status` fields but no claim-provenance relation, so no repository artifact grounds a promotion criterion for them — defining one is an open governance decision (specs/M2.md, open choice O7), not silently decided.
 
 ## Rules of the road
 

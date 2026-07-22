@@ -1,6 +1,6 @@
 # ADR-0009: Truncation observables are claim-backed but have no taxonomy kind in M1
 
-- **Status:** Accepted
+- **Status:** Superseded by [ADR-0010](0010-truncation-kind-re-deferred.md)
 - **Date:** 2026-07-14
 
 ## Context

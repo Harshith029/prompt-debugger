@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| **Status** | Milestone M0 (engineering foundation) complete, released as `v0.1.0-alpha`. Milestone M1 (knowledge verification & policy authoring) complete, released as `v0.2.0-alpha`: the claim registry is verified against live sources, the policy layer (misuse policy, rewrite policy, notices) is authored and frozen, the event-taxonomy prose is complete, the pattern library is complete, and the knowledge snapshot is versioned (`2026.07-m1`). Milestone M2 has not started; analyzer and rewrite behavior are future work (M2–M4). |
-| **Document version** | 1.1 |
-| **Last updated** | 2026-07-14 |
+| **Status** | Milestone M0 (engineering foundation) complete, released as `v0.1.0-alpha`. Milestone M1 (knowledge verification & policy authoring) complete, released as `v0.2.0-alpha`: the claim registry is verified against live sources, the policy layer (misuse policy, rewrite policy, notices) is authored and frozen, the event-taxonomy prose is complete, the pattern library is complete, and the knowledge snapshot was versioned (`2026.07-m1`). Milestone M2 (core library) complete, released as `v0.3.0-alpha` per [specs/M2.md](../specs/M2.md): the deterministic library (validation, verification, redaction, sanitization, storage, rendering, knowledge accessors, CLI) is implemented and frozen, the claim-grounded knowledge classes are promoted (snapshot `2026.07-m2`), and the size-warning threshold is measured — record: [releases/M2.md](releases/M2.md). Analyzer and rewrite behavior are future work (M3–M4). |
+| **Document version** | 1.2 |
+| **Last updated** | 2026-07-22 |
 
 This document describes the architecture of `prompt-debugger`: its layering, contracts, and the reasoning behind the significant design decisions. Decisions are also captured individually as [Architecture Decision Records](adr/README.md).
 
@@ -108,15 +108,16 @@ Facts the product currently relies on (each is a registry entry, `status: "verif
                 │ validated by / rendered by
 ┌───────────────▼───────────────────────────────────────────────────────┐
 │ CORE LIBRARY  (src/prompt_debugger/ — Python 3.10+, stdlib only)      │
-│  ── implemented in Milestone M2; today the package ships only         │
-│     version constants (__init__.py) and path resolution (paths.py) ── │
-│  store    locking · atomic append · migrate · doctor · archive   (M2) │
-│  schema   JSON-Schema-subset validator                           (M2) │
-│  verify   evidence-quote substring verification · IR checks      (M2) │
-│  redact   secret/PII scrub (typed placeholders)                  (M2) │
-│  sanitize control-char/ANSI stripping · CSV formula escaping     (M2) │
-│  render   Report JSON → Markdown/CSV/JSON exports                (M2) │
-│  cli      argparse entry point wrapping all of the above         (M2) │
+│  ── the deterministic core, built across Milestone M2 (complete,      │
+│     released as v0.3.0-alpha): every library module below is          │
+│     implemented and frozen; FR-1 through FR-12 approved ──            │
+│  store    locking · atomic append · migrate · doctor · archive (done) │
+│  schema   JSON-Schema-subset validator                         (done) │
+│  verify   evidence-quote substring verification · IR checks    (done) │
+│  redact   secret/PII scrub (typed placeholders)                (done) │
+│  sanitize control-char/ANSI stripping · CSV formula escaping   (done) │
+│  render   Report JSON → Markdown/CSV/JSON exports              (done) │
+│  cli      argparse entry point wrapping all of the above       (done) │
 └───────────────┬───────────────────────────────────────────────────────┘
                 ▼
 │ LOCAL STORAGE (user-owned, no network)                                │
@@ -191,8 +192,9 @@ prompt-debugger/
 │           │                        #  · notices(.json/.md)
 │           └── anthropic/           # claims.json (verified) · techniques(.json/.md)
 │                                    #  · events(.json/.md) · patterns/
-├── src/prompt_debugger/             # CORE LIBRARY (stdlib-only)
-│   └── __init__.py · paths.py · py.typed     # M0 scope; modules land in M2
+├── src/prompt_debugger/             # CORE LIBRARY (stdlib-only, M2)
+│   └── __init__.py · paths.py · schema.py · store.py · verify.py · redact.py
+│       · sanitize.py · render.py · knowledge.py · cli.py · py.typed
 ├── adapters/
 │   └── claude-code/                 # the one v1 adapter
 │       ├── .claude-plugin/          # plugin.json · marketplace.json
@@ -200,7 +202,7 @@ prompt-debugger/
 │       ├── skills/                  # analyze · rewrite · history · pd
 │       │                            #  (M0 skeletons; behavior authored M2–M4)
 │       └── core/                    # VENDORED copy of core/ (generated, CI-checked)
-├── benchmarks/                      # 9-category prompt corpus + run.py + case schema
+├── benchmarks/                      # prompt corpus + run.py; perf/ timing harness (M2 FR-11)
 ├── evals/                           # semantic-suite protocols (harnesses land M3)
 ├── tools/                           # validate_schemas · check_imports · check_links
 │                                    #  · check_versions · check_release_version
@@ -218,7 +220,7 @@ prompt-debugger/
 └── pyproject.toml                   # tooling config; no runtime deps
 ```
 
-**Planned additions (do not exist yet):** the library modules `store/schema/verify/redact/sanitize/render/cli` (M2); per-skill `evals/evals.json` and the semantic-eval harnesses (M3); `docs/INSTALL.md`, `docs/USAGE.md`, and `examples/` (M5); the benchmark performance harness (`benchmarks/perf/`, M2).
+**Planned additions (do not exist yet):** per-skill `evals/evals.json` and the semantic-eval harnesses (M3); `docs/INSTALL.md`, `docs/USAGE.md`, and `examples/` (M5). The M2 library modules (`schema/store/verify/redact/sanitize/render/cli`) and the benchmark performance harness (`benchmarks/perf/`) are implemented (M2 FR-1 through FR-11).
 
 ---
 
@@ -366,7 +368,7 @@ Implemented in M1 FR-3 as frozen, schema-validated declarative data: `misuse-pol
 
 ### 6.7 Schema validation strategy
 
-Schemas are standard **JSON Schema draft 2020-12 restricted to a documented subset**: `type`, `enum`, `const`, `required`, `properties`, `items`, `additionalProperties: false`, `pattern`, `minLength/maxLength`, `minimum/maximum`, `minItems/maxItems`, nullable via `type` arrays. Today, a CI meta-check (`tools/validate_schemas.py` + `tools/_subset.py`) rejects any schema using constructs outside the subset, and the dev-only `jsonschema` package validates every seed instance against its schema. The in-repo runtime validator `schema.py` lands in M2 and will implement exactly this subset; from then CI additionally runs **differential validation** — `jsonschema` and `schema.py` must agree on accept/reject for every schema and fixture, and disagreement fails the build.
+Schemas are standard **JSON Schema draft 2020-12 restricted to a documented subset**: `type`, `enum`, `const`, `required`, `properties`, `items`, `additionalProperties: false`, `pattern`, `minLength/maxLength`, `minimum/maximum`, `minItems/maxItems`, nullable via `type` arrays. Today, a CI meta-check (`tools/validate_schemas.py` + `tools/_subset.py`) rejects any schema using constructs outside the subset, and the dev-only `jsonschema` package validates every seed instance against its schema. The in-repo runtime validator ([`src/prompt_debugger/schema.py`](../src/prompt_debugger/schema.py), M2 FR-1) implements exactly this subset — retained keywords keep their full draft 2020-12 definitions — and CI runs **differential validation** (`tests/test_differential_validation.py`): `jsonschema` and `schema.py` must agree on accept/reject for every repository schema and an accept/reject fixture corpus, and disagreement fails the build.
 
 ### 6.8 Storage specification
 
@@ -426,8 +428,8 @@ Residual-risk statement (recorded in [docs/THREAT-MODEL.md](THREAT-MODEL.md), wh
 ## 9. Performance review
 
 - **Token budget:** SKILL.md files ≤ 300 lines (hard cap 500); trigger keywords front-loaded in descriptions (1,536-char listing cap); contracts loaded stepwise from `core/`; scripts executed, never loaded. Idle plugin cost ≈ three descriptions.
-- **Runtime:** O(n) JSONL scans. **Measured, not asserted (planned for M2):** alongside the storage implementation, `benchmarks/` will add synthetic-store generators (10k / 100k records) and a timing harness so the size-warning threshold comes from measurements on the CI matrix rather than a guessed constant. The current pre-release ships the prompt corpus and its validator; the store generators and timing harness do not exist yet. Defined max-size behavior: warn at threshold, suggest `archive`.
-- **Latency:** dominated by model reasoning (the product itself); scripts add single-digit milliseconds at realistic sizes (verified by benchmarks).
+- **Runtime:** O(n) JSONL scans. **Measured (M2 FR-11):** `benchmarks/perf/harness.py` provides synthetic-store generators (10k / 100k records) and a timing harness; the CI matrix runs its `validate` smoke and the 10k/100k `measure` procedure, and [`benchmarks/perf/RESULTS.md`](../benchmarks/perf/RESULTS.md) records the measurements. Every read scan validates each record on read (the fail-closed S10 path), so the scan is linear at ≈ 0.63 ms/record in the stable small-size region (dominated by per-record composite schema validation) and degrades super-linearly at large sizes (a 100k read measured at minutes). The size-warning threshold (`size_warn_records`) is set from this measurement rather than a guessed constant — **1,000** — chosen conservatively below the modeled ~1,600-record one-second interactive-responsiveness crossover (at 1,000 records a read measures ≈ 0.62 s, well under one second). Defined max-size behavior: warn at threshold, suggest `archive`.
+- **Latency:** dominated by model reasoning (the product itself). Read-scan scripts cost ≈ 0.63 ms/record (M2 FR-11 measurement), so a full-history read stays sub-second up to ~1,600 records; the size-warning threshold is set conservatively below that crossover, at 1,000.
 
 ---
 
@@ -435,8 +437,8 @@ Residual-risk statement (recorded in [docs/THREAT-MODEL.md](THREAT-MODEL.md), wh
 
 | Layer | What | How | When |
 |---|---|---|---|
-| Unit | **Now:** `paths`, tooling entry points. **From M2:** `store` (locking, atomic append, migrate, doctor, archive), `schema`, `verify`, `redact` (true/false-positive corpus), `sanitize`, `render`, `cli` | pytest, 3-OS matrix | every PR |
-| Differential | **Now:** the subset conformance meta-check on every schema. **From M2:** the in-repo subset validator vs `jsonschema` on all schemas + a fixture corpus (accept and reject cases) | pytest (dev dep) | every PR |
+| Unit | **Now (M2, FR-1 through FR-11):** `paths`, `schema`, `store` (locking, atomic append, migrate, doctor, archive), `verify`, `redact` (true/false-positive corpus), `sanitize`, `render`, `cli`, tooling entry points | pytest, 3-OS matrix | every PR |
+| Differential | **Now (M2 FR-1):** the subset conformance meta-check on every schema, plus the in-repo subset validator vs `jsonschema` on all schemas + a fixture corpus (accept and reject cases) | pytest (dev dep) | every PR |
 | Contract | frontmatter ↔ documented permission profile; name/description constraints; SKILL.md line caps; one-hop references resolve; no `` !` `` patterns; AST import allowlist; socket-block suite | dedicated checks | every PR |
 | Schema | Report JSON / IR / record / config fixtures validate (now); evidence-quote verification on golden reports (from M2) | pytest | every PR |
 | Skill evals | per-skill `evals.json`: should-trigger / should-not-trigger; golden scenarios (ambiguous prompt → R1; safeguard event → Observed/Estimated separation; unknown event → honest `unknown` handling; injection payload → treated as data) | skill-creator loop + documented manual baseline protocol (fresh session, with/without skill) | release gate + on skill changes |
@@ -470,7 +472,7 @@ Each milestone is validated against a fixed engineering review checklist — cor
 |---|-------------|---------------|-------|
 | M0 | **Engineering foundation**: repo structure, the 8 versioned contracts + schemas, Knowledge Engine structure with seed content, benchmarks, tooling, tests, ADRs, docs, CI | CI green on all 3 OSes; independent review passed | **complete** — `v0.1.0-alpha`; record: [releases/M0.md](releases/M0.md) |
 | M1 | **Knowledge verification & policy authoring** ([spec](../specs/M1.md)): every claim verified/stale/retired against its live source (incl. the consumer-surface fallback resolution); misuse policy + rewrite policy + notices authored in `common`; taxonomy prose completed; patterns and version bookkeeping | Spec acceptance criteria met; knowledge-integrity tests green; independent verification | **complete** — `v0.2.0-alpha`; record: [releases/M1.md](releases/M1.md) |
-| M2 | **Core library**: store/schema/verify/redact/sanitize/render/cli + unit, differential, contract, benchmark suites | Full coverage of §6.8 behaviors incl. locking, doctor, migrate; benchmarks recorded | planned |
+| M2 | **Core library**: store/schema/verify/redact/sanitize/render/cli + unit, differential, contract, benchmark suites ([spec](../specs/M2.md)) | Full coverage of §6.8 behaviors incl. locking, doctor, migrate; benchmarks recorded | **complete** — `v0.3.0-alpha`; record: [releases/M2.md](releases/M2.md) |
 | M3 | **`analyze` + `rewrite` skills** + trigger evals + adversarial/injection/meaning-preservation/rubric-calibration suites | Golden + adversarial evals pass; gate branches verified; evidence-verification loop works end-to-end | planned |
 | M4 | **`history` skill** wiring + privacy verifications | Raw-storage UX (rare/loud/reversible) verified; export redaction verified; permission-profile contract green | planned |
 | M5 | Docs (INSTALL/USAGE), examples, packaging, release trust pipeline | Fresh-machine installs on 3 OSes; examples reproduce; release dry-run with checksums + attestations | planned |

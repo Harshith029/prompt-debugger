@@ -132,3 +132,27 @@ def test_ir_kind_enum_reserves_other() -> None:
     schema = _load(CONTRACTS / "prompt-ir" / "prompt-ir.schema.json")
     kind_schema = schema["properties"]["segments"]["items"]["properties"]["kind"]
     assert "other" in kind_schema["enum"]
+
+
+# --- FR-9 (ADR-0010): truncation kind re-deferred; event kind enum unchanged in M2 ----
+
+
+def test_event_kind_enum_unchanged_truncation_re_deferred() -> None:
+    # ADR-0010 (M2 FR-9 revisit of ADR-0009) re-deferred the truncation/stop-condition
+    # kind: M2 adds no `kind` member and no taxonomy entry. The frozen v1 enum stands
+    # exactly as at M0/M1. Adding a stop-condition kind is a superseding-ADR decision and
+    # a contract version bump (Observable Event contract, Compatibility) — never a silent
+    # edit. This guards the re-deferral from regression.
+    schema = _load(CONTRACTS / "events" / "observable-event.schema.json")
+    kinds = set(schema["properties"]["kind"]["enum"])
+    assert kinds == {
+        "refusal_message",
+        "model_switch",
+        "api_refusal_stop_reason",
+        "api_fallback_block",
+        "error",
+        "unknown",
+        "none",
+    }
+    # event_version stays 1: no contract evolution accompanied the re-deferral.
+    assert schema["properties"]["event_version"]["const"] == 1

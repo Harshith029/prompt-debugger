@@ -61,5 +61,11 @@ jobs:
       - name: Benchmark corpus integrity
         run: python benchmarks/run.py validate
 
+      - name: Performance harness smoke (M2 FR-11)
+        run: python benchmarks/perf/harness.py validate
+
+      - name: Performance measurement procedure (M2 FR-11, 10k/100k on the matrix)
+        run: python benchmarks/perf/harness.py measure --sizes 10000,100000 --repeats 1
+
       - name: Tests
         run: pytest

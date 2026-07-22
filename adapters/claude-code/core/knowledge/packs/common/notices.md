@@ -1,4 +1,4 @@
-# Notices — prose companion (policy_version 2026.07-m1)
+# Notices — prose companion (policy_version 2026.07-m2)
 
 Human/model-readable companion to [`notices.json`](notices.json). Ids match one-to-one.
 

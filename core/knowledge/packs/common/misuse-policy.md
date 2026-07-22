@@ -1,4 +1,4 @@
-# Misuse Policy — prose companion (policy_version 2026.07-m1)
+# Misuse Policy — prose companion (policy_version 2026.07-m2)
 
 Human/model-readable exposition of the misuse classification defined in [`misuse-policy.json`](misuse-policy.json). Ids match one-to-one. The JSON is what machines validate; this file is what analysis-layer adapters read. Design basis: [policy architecture §4](../../../../docs/design/policy-architecture.md).
 

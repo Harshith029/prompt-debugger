@@ -1,4 +1,4 @@
-# Quality Rubric — prose companion (rubric_version 2026.07-m1)
+# Quality Rubric — prose companion (rubric_version 2026.07-m2)
 
 Extended detection guidance for the dimensions defined in [`rubric.json`](rubric.json). Ids match one-to-one. This file is what analysis-layer adapters read; the JSON is what machines validate.
 

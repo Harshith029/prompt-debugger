@@ -3,13 +3,13 @@
 [![CI](https://github.com/Harshith029/prompt-debugger/actions/workflows/ci.yml/badge.svg)](https://github.com/Harshith029/prompt-debugger/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](pyproject.toml)
-[![Status](https://img.shields.io/badge/status-pre--release%20(M1%20complete)-orange.svg)](#project-status)
+[![Status](https://img.shields.io/badge/status-pre--release%20(M2%20complete)-orange.svg)](#project-status)
 
 **Understand what you can see. Improve what you can control.**
 
 `prompt-debugger` is an open-source toolkit that helps you understand **observable** AI model behavior — visible safeguard messages, visible model switches, and user-visible errors — and improve your prompts using published prompt-engineering guidance. The first shipped surface is a [Claude Code](https://code.claude.com) plugin; the analysis engine is host-neutral by design.
 
-> **Status: pre-release (Milestones M0 and M1 complete; M2 not started).** The engineering foundation — contracts, schemas, the knowledge engine, benchmarks, tooling, and CI — is in place and green; the claim registry is verified against live sources, the policy layer is authored and frozen, the taxonomy prose and pattern library are complete, and the knowledge snapshot is versioned (`2026.07-m1`). **Analyzer and rewrite functionality are not implemented yet** (Milestones M2–M4). This repository is being built in the open, milestone by milestone, with an independent review at every step. See [Project status](#project-status).
+> **Status: pre-release (Milestones M0–M2 complete).** The engineering foundation — contracts, schemas, the knowledge engine, benchmarks, tooling, and CI — is in place and green; the claim registry is verified against live sources, the policy layer is authored and frozen, the taxonomy prose and pattern library are complete, the knowledge snapshot is versioned (`2026.07-m2`), and the deterministic core library (validation, verification, redaction, sanitization, storage, rendering, knowledge accessors, CLI) is implemented and frozen. **Analyzer and rewrite functionality are not implemented yet** (Milestones M3–M4). This repository is being built in the open, milestone by milestone, with an independent review at every step. See [Project status](#project-status).
 
 ---
 
@@ -162,14 +162,15 @@ Nothing is persisted unless you explicitly save it. Saved records are redacted b
 
 ## Project status
 
-**Pre-release. Milestone M0 (engineering foundation) and Milestone M1 (knowledge verification and policy authoring) are complete; Milestone M2 has not started.** What exists today:
+**Pre-release. Milestones M0 (engineering foundation), M1 (knowledge verification and policy authoring), and M2 (core library) are complete. M2 is released as `v0.3.0-alpha` — every FR independently approved and frozen; record: [docs/releases/M2.md](docs/releases/M2.md).** What exists today:
 
 - Eight versioned, host-neutral contracts with JSON schemas and prose specifications, plus three additive knowledge schemas for the policy files.
-- The Knowledge Engine with a **verified claim registry** (every claim checked against its live source, with dates), a complete observable-event taxonomy, the authored provider-neutral policy layer (misuse policy, rewrite policy, fixed notices) — frozen after independent review — and a complete pattern library (one before/after pattern per rubric dimension), all versioned as the `2026.07-m1` snapshot.
+- The Knowledge Engine with a **verified claim registry** (every claim checked against its live source, with dates), a complete observable-event taxonomy, the authored provider-neutral policy layer (misuse policy, rewrite policy, fixed notices) — frozen after independent review — and a complete pattern library (one before/after pattern per rubric dimension), all versioned as the `2026.07-m2` snapshot.
 - A nine-category benchmark corpus, the full tooling and CI suite, and a passing test suite.
 - Complete architecture documentation, including nine Architecture Decision Records.
+- The M2 core-library modules (`schema`, `store`, `verify`, `redact`, `sanitize`, `render`, `knowledge`, `cli`), stdlib-only and reviewed through FR-10, plus the FR-11 performance harness and the measured size-warning threshold.
 
-What does **not** exist yet: the analyzer, the rewriter, and the storage implementation. Those are Milestones M2–M4. This is deliberate — the foundation is built and reviewed before any feature logic.
+What does **not** exist yet: the model-facing behavior — the analyzer and the rewriter — and their skill wiring. Those are Milestones M3–M4. This is deliberate — the deterministic foundation (contracts, knowledge, and the M2 core library) is built and reviewed before any feature logic.
 
 ## Roadmap and future milestones
 
@@ -177,7 +178,7 @@ What does **not** exist yet: the analyzer, the rewriter, and the storage impleme
 |---|---|---|
 | **M0** | Engineering foundation: repo, contracts, knowledge engine, benchmarks, tooling, CI, docs | **complete** |
 | M1 | Knowledge verification: verify every claim against its source, author the misuse policy + rewrite rules + notices, expand the taxonomy, populate the pattern library | **complete** — released as `v0.2.0-alpha`; record: [docs/releases/M1.md](docs/releases/M1.md) |
-| M2 | Core library: storage, schema validation, evidence verification, redaction, rendering, CLI | planned |
+| M2 | Core library: storage, schema validation, evidence verification, redaction, rendering, CLI | **complete** — released as `v0.3.0-alpha`; record: [docs/releases/M2.md](docs/releases/M2.md) — spec: [specs/M2.md](specs/M2.md) |
 | M3 | `analyze` + `rewrite` skills; trigger, adversarial, meaning-preservation, and rubric-calibration evals | planned |
 | M4 | `history` skill; privacy verifications | planned |
 | M5 | Docs, examples, packaging, release-trust pipeline; cross-OS install tests | planned |

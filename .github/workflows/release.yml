@@ -26,9 +26,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements-dev.txt
 
-      # Never release a tag that does not pass the full gate. This runs every check the
-      # pull-request CI gate runs (in the same order), so the release gate is never
-      # weaker than the PR gate — including the version-consistency check.
+      # Never release a tag that does not pass the full gate. This runs every gate
+      # check the pull-request CI gate runs (in the same order), so the release gate
+      # is never weaker than the PR gate — including the version-consistency check and
+      # the performance-harness smoke. (The PR CI matrix additionally runs the 10k/100k
+      # timing measurement, which is a measurement procedure, not a pass/fail gate.)
       - name: Run full gate (identical to PR CI)
         run: |
           ruff check .
@@ -40,6 +42,7 @@ jobs:
           python tools/check_links.py
           python tools/check_plugin_sync.py
           python benchmarks/run.py validate
+          python benchmarks/perf/harness.py validate
           pytest
 
       # Release-only: version-bearing files must additionally match the git tag

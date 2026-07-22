@@ -1,7 +1,7 @@
 {
   "pack_id": "common",
   "kind": "common",
-  "pack_version": "2026.07-m1",
+  "pack_version": "2026.07-m2",
   "provider": null,
   "description": "Provider-neutral methodology: the prompt-quality rubric, the misuse policy, the rewrite transformation rules and guarantees, and the fixed notice texts."
 }
